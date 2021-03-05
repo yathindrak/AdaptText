@@ -23,8 +23,8 @@ add-apt-repository ppa:deadsnakes/ppa -y
 apt update
 apt install -y python3
 apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
-apt install python3-pip
-apt-get install python3-venv
+apt install -y python3-pip
+apt-get install -y python3-venv
 install --upgrade pip
 apt-get install git
 apt install -y nginx
@@ -43,7 +43,7 @@ source env/bin/activate
 
 pip3 install -r requirements.txt
 
-mkdir ./api/optimizer
+mkdir api/optimizer
 git clone https://gitlab.com/yathindra/fastai1.git
 git clone https://github.com/lessw2020/Best-Deep-Learning-Optimizers.git
 cp ./Best-Deep-Learning-Optimizers/diffgrad/diffgrad.py ./api/optimizer/DiffGradOptimizer.py
@@ -53,6 +53,8 @@ cd ..
 
 cp ./adapttext.service /etc/systemd/system/adapttext.service
 systemctl daemon-reload
+systemctl enable adapttext.service
+sudo systemctl start adapttext.service
 
 sudo rm /etc/nginx/sites-enabled/default
 cp ./adapttext.nginx /etc/nginx/sites-available

@@ -1,8 +1,9 @@
+wikiextractor==0.01
+matplotlib==3.1.1
 flask_cors
 torchvision
 flask_sqlalchemy
 flask-praetorian
-wikiextractor==0.01
 sentencepiece==0.1.95
 ninja==1.10.0
 emoji==1.2.0
@@ -15,7 +16,6 @@ dropbox==11.2.0
 dataclasses==0.6
 spacy==2.3.5
 # numpy==1.17.0
-matplotlib==3.1.1
 # pandas==0.25.0
 scikit-learn==0.24.1
 fastprogress
