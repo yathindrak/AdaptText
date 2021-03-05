@@ -13,20 +13,21 @@ mkdir /downloads
 # setup instance
 #commented out below scripts temp
 apt update
-apt install nodejs
-apt install npm
+apt install -y nodejs
+apt install -y npm
 npm i -g yarn
+yarn
 yarn build
-apt install software-properties-common
+apt install -y software-properties-common
 add-apt-repository ppa:deadsnakes/ppa -y
 apt update
-apt install python3
-apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
+apt install -y python3
+apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
 apt install python3-pip
 apt-get install python3-venv
 install --upgrade pip
 apt-get install git
-apt install nginx
+apt install -y nginx
 #
 apt update
 
@@ -42,6 +43,8 @@ source env/bin/activate
 
 pip3 install -r requirements.txt
 
+cd ..
+
 cp ./adapttext.service /etc/systemd/system/adapttext.service
 systemctl daemon-reload
 
@@ -50,11 +53,8 @@ cp ./adapttext.nginx /etc/nginx/sites-available
 sudo ln -s /etc/nginx/sites-available/adapttext.nginx /etc/nginx/sites-enabled/adapttext.nginx
 sudo systemctl reload nginx
 
-
-mkdir ./adapttext/optimizer
+mkdir ./api/optimizer
 git clone https://gitlab.com/yathindra/fastai1.git
 git clone https://github.com/lessw2020/Best-Deep-Learning-Optimizers.git
-cp ./Best-Deep-Learning-Optimizers/diffgrad/diffgrad.py ./adapttext/optimizer/DiffGradOptimizer.py
+cp ./Best-Deep-Learning-Optimizers/diffgrad/diffgrad.py ./api/optimizer/DiffGradOptimizer.py
 rm -rf ./Best-Deep-Learning-Optimizers
-
-cd ..
