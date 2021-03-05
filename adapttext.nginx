@@ -1,6 +1,6 @@
 server {
     server_name example.com;
-    root /adapttext/build;
+    root /home/thilisadunik/adapttext/build;
     index index.html;
 
     location / {

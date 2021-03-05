@@ -10,14 +10,13 @@
 mkdir /storage
 mkdir /downloads
 
-yarn build
-
 # setup instance
 #commented out below scripts temp
 apt update
 apt install nodejs
 apt install npm
 npm i -g yarn
+yarn build
 apt install software-properties-common
 add-apt-repository ppa:deadsnakes/ppa -y
 apt update
