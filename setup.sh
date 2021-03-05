@@ -43,6 +43,12 @@ source env/bin/activate
 
 pip3 install -r requirements.txt
 
+mkdir ./api/optimizer
+git clone https://gitlab.com/yathindra/fastai1.git
+git clone https://github.com/lessw2020/Best-Deep-Learning-Optimizers.git
+cp ./Best-Deep-Learning-Optimizers/diffgrad/diffgrad.py ./api/optimizer/DiffGradOptimizer.py
+rm -rf ./Best-Deep-Learning-Optimizers
+
 cd ..
 
 cp ./adapttext.service /etc/systemd/system/adapttext.service
@@ -52,9 +58,3 @@ sudo rm /etc/nginx/sites-enabled/default
 cp ./adapttext.nginx /etc/nginx/sites-available
 sudo ln -s /etc/nginx/sites-available/adapttext.nginx /etc/nginx/sites-enabled/adapttext.nginx
 sudo systemctl reload nginx
-
-mkdir ./api/optimizer
-git clone https://gitlab.com/yathindra/fastai1.git
-git clone https://github.com/lessw2020/Best-Deep-Learning-Optimizers.git
-cp ./Best-Deep-Learning-Optimizers/diffgrad/diffgrad.py ./api/optimizer/DiffGradOptimizer.py
-rm -rf ./Best-Deep-Learning-Optimizers
