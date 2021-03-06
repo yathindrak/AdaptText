@@ -54,7 +54,7 @@ flask init_database
 flask add_user test test123
 flask add_user yathindra yathindra123
 
-touch ${HOME}/adapttext/api/error.log
+touch /home/thilisadunik/adapttext/api/error.log
 chmod 777 ${HOME}/adapttext/api/error.log
 
 mkdir optimizer
