@@ -1,5 +1,5 @@
 wikiextractor==0.01
-matplotlib==3.1.1
+matplotlib==3.3.4
 torchvision
 sentencepiece==0.1.95
 ninja==1.10.0
@@ -15,3 +15,7 @@ spacy==2.3.5
 # pandas==0.25.0
 scikit-learn==0.24.1
 fastprogress
+flask==1.1.2
+flask_cors
+flask_sqlalchemy
+flask-praetorian
