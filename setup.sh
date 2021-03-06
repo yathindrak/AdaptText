@@ -28,6 +28,7 @@ apt-get install -y python3-venv
 install --upgrade pip
 apt-get install git
 apt install -y nginx
+apt install -y libmysqlclient-dev
 #
 apt update
 
@@ -37,11 +38,14 @@ cd api
 #python3 -m venv venv
 #source venv/bin/activate
 
-python3 -m venv env
-#venv\Scripts\activate
-source env/bin/activate
+# python3 -m venv env
+# source env/bin/activate
+
+pip install --upgrade setuptools
 
 pip3 install -r requirements.txt
+
+pip3 install flask==1.1.2
 
 flask init_database
 flask add_user test test123
