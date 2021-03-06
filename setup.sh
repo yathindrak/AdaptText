@@ -43,6 +43,10 @@ source env/bin/activate
 
 pip3 install -r requirements.txt
 
+flask init_database
+flask add_user test test123
+flask add_user yathindra yathindra123
+
 mkdir api/optimizer
 git clone https://gitlab.com/yathindra/fastai1.git
 git clone https://github.com/lessw2020/Best-Deep-Learning-Optimizers.git

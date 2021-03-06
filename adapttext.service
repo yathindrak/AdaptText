@@ -6,7 +6,7 @@ After=network.target
 User=thilisadunik
 WorkingDirectory=/home/thilisadunik/adapttext/api
 EnvironmentFile=/home/thilisadunik/adapttext/.env
-ExecStart=/home/thilisadunik/adapttext/api/env/bin/gunicorn -b 127.0.0.1:5000 api:app --log-file /home/thilisadunik/adapttext/api/gunicorn.log --log-level=debug
+ExecStart=/home/thilisadunik/adapttext/api/env/bin/flask --host=0.0.0.0
 Restart=always
 
 [Install]
