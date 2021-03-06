@@ -43,8 +43,11 @@ source env/bin/activate
 
 pip install --upgrade setuptools
 
+pip3 install blinker==1.4 wrapt==1.12.1 smart-open==3.0.0 inflection==0.3.1 wikiextractor==0.01 flask-mail==0.9.1
+
 pip3 install -r requirements.txt
 
+pip3 install flask-mail==0.9.1
 pip3 install flask==1.1.2
 pip3 install flask_cors
 pip3 install flask_sqlalchemy
@@ -55,7 +58,7 @@ flask add_user test test123
 flask add_user yathindra yathindra123
 
 touch /home/thilisadunik/adapttext/api/error.log
-chmod 777 ${HOME}/adapttext/api/error.log
+chmod 777 /home/thilisadunik/adapttext/api/error.log
 
 mkdir optimizer
 git clone https://gitlab.com/yathindra/fastai1.git
