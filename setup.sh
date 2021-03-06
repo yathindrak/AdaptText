@@ -58,9 +58,9 @@ cd ..
 cp ./adapttext.service /etc/systemd/system/adapttext.service
 systemctl daemon-reload
 systemctl enable adapttext.service
-sudo systemctl start adapttext.service
+systemctl start adapttext.service
 
-sudo rm /etc/nginx/sites-enabled/default
+rm /etc/nginx/sites-enabled/default
 cp ./adapttext.nginx /etc/nginx/sites-available
-sudo ln -s /etc/nginx/sites-available/adapttext.nginx /etc/nginx/sites-enabled/adapttext.nginx
-sudo systemctl reload nginx
+ln -s /etc/nginx/sites-available/adapttext.nginx /etc/nginx/sites-enabled/adapttext.nginx
+systemctl reload nginx
