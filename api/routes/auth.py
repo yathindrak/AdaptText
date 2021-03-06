@@ -4,16 +4,20 @@ from flask_praetorian import auth_required
 from ..utils.http_utils import make_err_response
 from ..connection.initializers import guard
 
-api = Blueprint('auth', __name__)
+auth_routes = Blueprint('auth', __name__)
 
 
-@api.route('/login', methods=['POST'])
+@auth_routes.route('/login', methods=['POST'])
 def login():
     json_obj = request.get_json()
     if not json_obj:
         return make_err_response('Bad Request', 'No credentials provided', 400)
-    user_name = json_obj['username']
-    password = json_obj['password']
+
+    try:
+        user_name = json_obj['username']
+        password = json_obj['password']
+    except:
+        return make_err_response('Bad Request', 'No credentials provided', 400)
 
     user = guard.authenticate(user_name, password)
     token = guard.encode_jwt_token(user)
@@ -21,13 +25,13 @@ def login():
     return jsonify({'access_token': token}), 200
 
 
-@api.route('/protected')
+@auth_routes.route('/protected')
 @auth_required
 def protected():
     return jsonify({'result': 'You are in a special area!'}), 200
 
 
-@api.route('/refresh', methods=['POST'])
+@auth_routes.route('/refresh', methods=['POST'])
 def refresh():
     json_data = request.get_json()
 
