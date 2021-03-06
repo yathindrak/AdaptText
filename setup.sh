@@ -54,10 +54,13 @@ flask init_database
 flask add_user test test123
 flask add_user yathindra yathindra123
 
-mkdir api/optimizer
+touch ${HOME}/adapttext/api/error.log
+chmod 777 ${HOME}/adapttext/api/error.log
+
+mkdir optimizer
 git clone https://gitlab.com/yathindra/fastai1.git
 git clone https://github.com/lessw2020/Best-Deep-Learning-Optimizers.git
-cp ./Best-Deep-Learning-Optimizers/diffgrad/diffgrad.py ./api/optimizer/DiffGradOptimizer.py
+cp ./Best-Deep-Learning-Optimizers/diffgrad/diffgrad.py ./optimizer/DiffGradOptimizer.py
 rm -rf ./Best-Deep-Learning-Optimizers
 
 cd ..
