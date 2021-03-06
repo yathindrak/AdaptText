@@ -38,14 +38,17 @@ cd api
 #python3 -m venv venv
 #source venv/bin/activate
 
-# python3 -m venv env
-# source env/bin/activate
+python3 -m venv env
+source env/bin/activate
 
 pip install --upgrade setuptools
 
 pip3 install -r requirements.txt
 
 pip3 install flask==1.1.2
+pip3 install flask_cors
+pip3 install flask_sqlalchemy
+pip3 install flask-praetorian
 
 flask init_database
 flask add_user test test123
