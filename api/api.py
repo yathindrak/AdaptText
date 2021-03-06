@@ -2,6 +2,7 @@ import os
 from os import environ
 from flask import Flask
 import flask_cors
+import logging
 
 from .commands import init_database, add_user
 from .connection.initializers import database, guard
@@ -11,6 +12,8 @@ from .routes.auth import api
 cors = flask_cors.CORS()
 
 app = Flask(__name__)
+
+logging.basicConfig(filename='error.log',level=logging.DEBUG)
 
 app.config['SECRET_KEY'] = environ.get('SECRET_KEY')
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('SQLITE_DB_URI')

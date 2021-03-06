@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=thilisadunik
 WorkingDirectory=/home/thilisadunik/adapttext/api
-EnvironmentFile=/home/thilisadunik/adapttext/.env
+EnvironmentFile=/home/thilisadunik/adapttext/api/.env
 ExecStart=/home/thilisadunik/adapttext/api/env/bin/flask run --host=0.0.0.0
 Restart=always
 
