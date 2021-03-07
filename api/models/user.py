@@ -1,3 +1,4 @@
+from .task import Task
 from ..connection.initializers import database as db
 
 class User(db.Model):
@@ -6,7 +7,8 @@ class User(db.Model):
     password = db.Column(db.Text)
     roles = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True, server_default='true')
-    tasks = db.relationship('Task', backref='user', lazy=True)
+    tasks = db.relationship(Task, backref='user', lazy=True)
+
     @property
     def rolenames(self):
         return []

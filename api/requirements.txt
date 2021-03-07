@@ -16,3 +16,4 @@ scikit-learn==0.24.1
 fastprogress
 marshmallow==3.10.0
 marshmallow-sqlalchemy==0.24.2
+pusher

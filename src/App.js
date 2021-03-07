@@ -6,6 +6,8 @@ import {
   Redirect,
   Link,
 } from "react-router-dom";
+import { FilePond } from "react-filepond";
+import "filepond/dist/filepond.min.css";
 import { login, authFetch, useAuth, logout } from "./auth";
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
@@ -60,8 +62,37 @@ function Home() {
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [files, setFiles] = useState([]);
+  const [pond, setPond] = useState();
+  const [task_id, setTask_id] = useState();
+
+  // this.state = {
+  //   // Set initial files, type 'local' means this is a file
+  //   // that has already been uploaded to the server (see docs)
+  //   files: [{
+  //       source: 'index.html',
+  //       options: {
+  //           type: 'local'
+  //       }
+  //   }]
+  // };
 
   const [logged] = useAuth();
+
+  useEffect(() => {
+    setTask_id(1)
+    // FilePond.registerPlugin(
+    //   FilePondPluginImagePreview,
+    //   FilePondPluginImageExifOrientation,
+    //   FilePondPluginFileValidateSize,
+    //   FilePondPluginImageEdit
+    // );
+    // Select the file input and use
+    // create() to turn it into a pond
+    // FilePond.create(
+    //   document.querySelector('input')
+    // );
+  }, []);
 
   const onLoginClick = (e) => {
     e.preventDefault();
@@ -96,9 +127,42 @@ function Login() {
     setPassword(event.target.value);
   };
 
+  const handleInit = () => {
+    console.log("FilePond instance has initialised", pond);
+  };
+
   return (
     <div>
       <h2>Login</h2>
+
+      {/* <input
+        type="file"
+        class="filepond"
+        name="filepond"
+        data-allow-reorder="true"
+        data-max-file-size="50MB"
+        data-max-files="1"
+      /> */}
+
+      <FilePond
+        ref={(ref) => setPond(ref)}
+        files={files}
+        allowMultiple={false}
+        server={
+          {
+              url: '/api/task/upload/'+task_id,
+          }
+        }
+        oninit={() => handleInit()}
+        onupdatefiles={(fileItems) => {
+          // Set current file objects to this.state
+          setFiles(fileItems.map((fileItem) => fileItem.file));
+
+          console.log("File Items : ");
+          console.log(fileItems);
+        }}
+      ></FilePond>
+
       {!logged ? (
         <form action="#">
           <div>
@@ -149,6 +213,32 @@ function Secret() {
           setMessage(response.message);
         }
       });
+
+    // FilePond.registerPlugin(
+    //   FilePondPluginImagePreview,
+    //   FilePondPluginImageExifOrientation,
+    //   FilePondPluginFileValidateSize,
+    //   FilePondPluginImageEdit
+    // );
+
+    // Select the file input and use
+    // create() to turn it into a pond
+    // FilePond.create(
+    //   document.querySelector('input')
+    // );
   }, []);
-  return <h2>Secret: {message}</h2>;
+  return (
+    <div>
+      <h2>Secret: {message}</h2>
+      {/* <input
+        type="file"
+        class="filepond"
+        name="filepond"
+        multiple
+        data-allow-reorder="true"
+        data-max-file-size="3MB"
+        data-max-files="3"
+      /> */}
+    </div>
+  );
 }

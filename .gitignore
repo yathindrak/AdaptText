@@ -27,3 +27,5 @@ yarn-error.log*
 *.db
 api/env/*
 api/error.log
+api/pipeline/fastai1/
+api/*.csv
