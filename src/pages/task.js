@@ -38,7 +38,17 @@ export default function Task() {
 
             if(response?.task.progress === 0) {
               // execute api call
-              
+              authFetch(`/api/task/execute/${parseInt(task_id)}`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              })
+                .then((response) => {
+                  console.log("executed")
+                  console.log(response);
+                  console.log(JSON.stringify(response));
+                });
             }
           }
         });
