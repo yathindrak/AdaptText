@@ -10,7 +10,9 @@ torch
 python-dotenv==0.15.0
 dropbox==11.2.0
 dataclasses==0.6
-spacy==3.0.3
+# spacy==3.0.3
+spacy==2.3.5
+IPython==7.21.0
 # numpy==1.17.0
 # pandas==0.25.0
 scikit-learn==0.24.1

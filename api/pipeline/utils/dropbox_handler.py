@@ -17,12 +17,14 @@ class DropboxHandler:
     # Upload a df as a text file
     def upload_text_file(self, df):
 
-        time_str_fname = self.app_root + "/" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
+        file_name = time.strftime("%Y%m%d-%H%M%S") + ".txt"
 
-        np.savetxt(time_str_fname, df.values, fmt='%d')
+        time_str_fname = self.app_root + "/" + file_name
+
+        np.savetxt(time_str_fname, df.values, fmt='%5s')
 
         file_to_upload = time_str_fname
-        file_where_to = "/adapttext/articles/" + time_str_fname
+        file_where_to = "/adapttext/articles/" + file_name
 
         self.upload(file_to_upload, file_where_to)
 

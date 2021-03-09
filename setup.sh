@@ -8,6 +8,7 @@
 
 #commented out below scripts temp
 mkdir /storage
+chmod 777 /storage
 mkdir /downloads
 
 # setup instance
