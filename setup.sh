@@ -32,6 +32,8 @@ apt install -y libmysqlclient-dev
 #
 apt update
 
+git clone https://gitlab.com/yathindra/fastai1.git
+
 # setup libs for the app
 cd api
 
@@ -53,6 +55,9 @@ pip3 install flask_cors
 pip3 install flask_sqlalchemy
 pip3 install flask-praetorian
 
+mkdir resources
+chmod 777 resources
+
 flask init_database
 flask add_user test test123
 flask add_user yathindra yathindra123
@@ -61,7 +66,8 @@ touch /home/thilisadunik/adapttext/api/error.log
 chmod 777 /home/thilisadunik/adapttext/api/error.log
 
 mkdir optimizer
-git clone https://gitlab.com/yathindra/fastai1.git
+# PS : comment this out and clone this to the root in react root, only in web app
+# git clone https://gitlab.com/yathindra/fastai1.git
 git clone https://github.com/lessw2020/Best-Deep-Learning-Optimizers.git
 cp ./Best-Deep-Learning-Optimizers/diffgrad/diffgrad.py ./optimizer/DiffGradOptimizer.py
 rm -rf ./Best-Deep-Learning-Optimizers
