@@ -11,3 +11,4 @@ class MetaInfo(db.Model):
     err = db.Column(db.Float)
     roc_auc = db.Column(db.Float)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
+

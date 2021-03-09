@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ReactNotification from "react-notifications-component";
 import {
   BrowserRouter as Router,
   Switch,
@@ -8,7 +9,15 @@ import {
 } from "react-router-dom";
 import { FilePond } from "react-filepond";
 import "filepond/dist/filepond.min.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "shards-ui/dist/css/shards.min.css";
+import "react-notifications-component/dist/theme.css";
 import { login, authFetch, useAuth, logout } from "./auth";
+import Login from "./pages/login";
+import Home from "./pages/home";
+import Tasks from "./pages/tasks";
+import "./App.css";
+import Task from "./pages/task";
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
   const [logged] = useAuth();
@@ -23,11 +32,24 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
   );
 };
 
+const LoginRoute = ({ component: Component, ...rest }) => {
+  const [logged] = useAuth();
+
+  return (
+    <Route
+      {...rest}
+      render={(props) =>
+        !logged ? <Component {...props} /> : <Redirect to="/" />
+      }
+    />
+  );
+};
+
 export default function App() {
   return (
     <Router>
       <div>
-        <nav>
+        {/* <nav>
           <ul>
             <li>
               <Link to="/">Home</Link>
@@ -39,13 +61,23 @@ export default function App() {
               <Link to="/secret">Secret</Link>
             </li>
           </ul>
-        </nav>
+        </nav> */}
+
+        <ReactNotification />
 
         <Switch>
-          <Route path="/login">
-            <Login />
+          <LoginRoute path="/login" component={Login} />
+          <Route path="/login123">
+            <Login123 />
           </Route>
           <PrivateRoute path="/secret" component={Secret} />
+          <Route path="/123">
+            <Home123 />
+          </Route>
+          <PrivateRoute path="/tasks" component={Tasks} />
+          <PrivateRoute path="/task/:id" component={Task} />
+
+
           <Route path="/">
             <Home />
           </Route>
@@ -55,11 +87,11 @@ export default function App() {
   );
 }
 
-function Home() {
+function Home123() {
   return <h2>Home</h2>;
 }
 
-function Login() {
+function Login123() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [files, setFiles] = useState([]);
@@ -80,7 +112,7 @@ function Login() {
   const [logged] = useAuth();
 
   useEffect(() => {
-    setTask_id(1)
+    setTask_id(1);
     // FilePond.registerPlugin(
     //   FilePondPluginImagePreview,
     //   FilePondPluginImageExifOrientation,
@@ -148,11 +180,9 @@ function Login() {
         ref={(ref) => setPond(ref)}
         files={files}
         allowMultiple={false}
-        server={
-          {
-              url: '/api/task/upload/'+task_id,
-          }
-        }
+        server={{
+          url: "/api/task/upload/" + task_id,
+        }}
         oninit={() => handleInit()}
         onupdatefiles={(fileItems) => {
           // Set current file objects to this.state

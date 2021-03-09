@@ -1,8 +1,9 @@
 import flask_praetorian
-from flask import Blueprint, jsonify, request, make_response
+from flask import Blueprint, jsonify, request, make_response, abort
 from flask_praetorian import auth_required
 from sqlalchemy.exc import IntegrityError
 import pandas as pd
+import csv
 
 from ..pipeline.adapt_text import AdaptText
 from ..pipeline.evaluator.evaluator import Evaluator
@@ -17,20 +18,27 @@ from ..connection.initializers import guard, database
 task_routes = Blueprint('task', __name__)
 
 
-@task_routes.route('/task', methods=['POST'])
+@task_routes.route('/task/initiate', methods=['POST'])
 @auth_required
-def create():
+def initiate():
     json_obj = request.get_json()
     if not json_obj:
         return make_err_response('Bad Request', 'No valid entries provided', 400)
     try:
         name = json_obj['name']
         description = json_obj['description']
-        progress = json_obj["progress"]
+        progress = 0
         model_path = None
+        ds_path = json_obj['ds_path']
+        ds_text_col = json_obj['ds_text_col']
+        ds_label_col = json_obj['ds_label_col']
+        continuous_train = json_obj['continuous_train']
+        accuracy = None
+        # task_id = id
     except:
         return make_err_response('Bad Request', 'No valid entries provided', 400)
 
+    model_path = None
     current_user = User.lookup(flask_praetorian.current_user().username)
 
     get_task = Task(name=name, description=description, progress=progress, model_path=model_path,
@@ -42,93 +50,69 @@ def create():
     except IntegrityError:
         return make_err_response('Bad Request', 'Duplicated name entered', 400)
 
-    task_schema = TaskSchema()
-    task = task_schema.dump(get_task)
-
-    return make_response(jsonify({"task": task}), 201)
-
-
-@task_routes.route('/task/initiate/<id>', methods=['POST'])
-@auth_required
-def initiate(id):
-    if not id:
-        return make_err_response('Bad Request', 'No valid id provided', 400)
-
-    json_obj = request.get_json()
-    if not json_obj:
-        return make_err_response('Bad Request', 'No valid entries provided', 400)
-    try:
-        ds_path = None
-        ds_text_col = json_obj['ds_text_col']
-        print(json_obj['ds_text_col'])
-        ds_label_col = json_obj['ds_label_col']
-        continuous_train = json_obj['continuous_train']
-        accuracy = None
-        task_id = id
-    except:
-        return make_err_response('Bad Request', 'No valid entries provided', 400)
-
-    get_meta_data = MetaInfo(ds_path=ds_path, ds_text_col=ds_text_col, ds_label_col=ds_label_col, continuous_train=continuous_train, accuracy=accuracy, task_id=task_id)
+    meta_data = MetaInfo(ds_path=ds_path, ds_text_col=ds_text_col, ds_label_col=ds_label_col,
+                         continuous_train=continuous_train, accuracy=accuracy, task_id=get_task.id)
 
     try:
-        database.session.add(get_meta_data)
+        database.session.add(meta_data)
         database.session.commit()
     except IntegrityError:
         return make_err_response('Bad Request', 'Duplicated name entered', 400)
 
     meta_info_schema = MetaInfoSchema()
-    meta_data = meta_info_schema.dump(get_meta_data)
+    meta_data = meta_info_schema.dump(meta_data)
 
     return make_response(jsonify({"meta_data": meta_data}), 201)
 
-@task_routes.route('/task/upload/<id>', methods=['POST'])
-def upload_csv(id):
+
+@task_routes.route('/task/upload', methods=['POST'])
+@auth_required
+def upload_csv():
     uploaded_file = request.files['filepond']
-    current_meta_data = MetaInfo.query.filter_by(task_id=id).first()
-    if not current_meta_data:
-        return make_err_response('Bad Request', 'Invalid task id provided', 400)
 
     if uploaded_file.filename != '':
-        uploaded_file.save(uploaded_file.filename)
+        file_path = "resources/" + uploaded_file.filename
+        uploaded_file.save(file_path)
 
-        # update meta info
-        database.session.query(MetaInfo).filter_by(task_id=id).update({"ds_path": uploaded_file.filename})
+        with open(file_path, encoding="utf8") as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
 
-        database.session.commit()
+            csv_column_names = []
 
-        meta_info_schema = MetaInfoSchema()
-        meta_data = meta_info_schema.dump(current_meta_data)
+            for row in csv_reader:
+                # read only the first row
+                csv_column_names.append(row)
+                break
 
-        return make_response(jsonify({"meta_data": meta_data}), 201)
+        return make_response(jsonify({"file_path": file_path, "column_names": csv_column_names[0]}), 201)
 
     else:
         return make_err_response('Bad Request', 'Invalid file provided', 400)
+
 
 @task_routes.route('/task/execute/<id>', methods=['POST'])
 @auth_required
 def execute(id):
     if not id:
-        return make_err_response('Bad Request', 'No valid id provided', 400)
+        return make_err_response('Bad Request', 'No id provided', 400)
 
-    current_task = Task.query.get(id)
-    current_meta_data = MetaInfo.query.filter_by(task_id=id).first()
-
-    if not current_meta_data:
-        return make_err_response('Bad Request', 'No valid id provided', 400)
+    meta_info = MetaInfo.query.filter_by(task_id=id).first()
+    model_path = None
+    current_user = User.lookup(flask_praetorian.current_user().username)
 
     lang = 'si'
     app_root = "/storage"
     bs = 128
     splitting_ratio = 0.1
-    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=current_meta_data.continuous_train)
+    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.continuous_train)
 
     pd.set_option('display.max_colwidth', -1)
     # path_to_csv="sinhala-hate-speech-dataset.csv"
-    path_to_csv = current_meta_data.ds_path
+    path_to_csv = meta_info.ds_path
     df = pd.read_csv(path_to_csv)
 
-    text_name = current_meta_data.ds_text_col
-    label_name = current_meta_data.ds_label_col
+    text_name = meta_info.ds_text_col
+    label_name = meta_info.ds_label_col
 
     print("Start building classification model")
     classifierModelFWD, classifierModelBWD, classes = adapt_text.build_classifier(df, text_name, label_name,
@@ -139,7 +123,11 @@ def execute(id):
     print("Ensemble classifier analysis")
     accuracy, err, roc_auc = evaluator.evaluate_ensemble(classifierModelFWD, classifierModelBWD)
 
-    return make_response("Excution completed", 201)
+    print('accuracy : ' + accuracy)
+    print('err : ' + err)
+    print('roc auc : ' + roc_auc)
+
+    return make_response(jsonify({"accuracy": accuracy, "err": err}), 201)
 
     # clear below part of this func
 

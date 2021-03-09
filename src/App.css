@@ -1,0 +1,42 @@
+.card-header {
+    display: none;
+}
+.csv-uploader {
+    width: 60vw;
+}
+
+#step-progress-wrapper > :first-child {
+    width: 60vw;
+    text-align: center;
+}
+
+@media only screen and (max-width: 768px) {
+    .card {
+        min-width: 90vw !important;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .card {
+        min-width: 90vw !important;
+    }
+
+    .csv-uploader {
+        width: 90vw;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    #step-progress-wrapper > :first-child {
+        width: 90vw;
+        text-align: center;
+    }
+}
+
+/* .dropdown-menu {
+    right: "0", left: "auto"
+} */
+
+.dataset-col-dropdown > button {
+    width: 28vw;
+}
