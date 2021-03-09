@@ -175,6 +175,9 @@ export default function Home() {
   useEffect(() => {
     setTask_id(1);
     const token = localStorage.getItem("REACT_TOKEN_AUTH_KEY");
+    if(!token) {
+      history.push(`/login`)
+    }
     setToken(JSON.parse(token).access_token);
   }, []);
 

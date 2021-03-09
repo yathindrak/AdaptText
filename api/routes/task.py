@@ -127,7 +127,8 @@ def execute(id):
     print('err : ' + err)
     print('roc auc : ' + roc_auc)
 
-    return make_response(jsonify({"accuracy": accuracy, "err": err}), 201)
+    # return make_response(jsonify({"accuracy": accuracy, "err": err}), 201)
+    return make_response('', 204)
 
     # clear below part of this func
 

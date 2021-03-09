@@ -76,11 +76,7 @@ export default function App() {
           </Route>
           <PrivateRoute path="/tasks" component={Tasks} />
           <PrivateRoute path="/task/:id" component={Task} />
-
-
-          <Route path="/">
-            <Home />
-          </Route>
+          <PrivateRoute path="/" component={Home} />
         </Switch>
       </div>
     </Router>
