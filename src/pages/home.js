@@ -17,7 +17,6 @@ import {
   Tooltip,
 } from "shards-react";
 import { useHistory } from 'react-router-dom';
-import "react-step-progress/dist/index.css";
 import { login, authFetch, useAuth, logout } from "../auth";
 import NavigationBar from "../components/navbar";
 
