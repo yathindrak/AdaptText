@@ -32,7 +32,7 @@ apt install -y libmysqlclient-dev
 #
 apt update
 
-git clone https://gitlab.com/yathindra/fastai1.git
+# git clone https://gitlab.com/yathindra/fastai1.git
 
 # setup libs for the app
 cd api
@@ -71,7 +71,9 @@ mkdir optimizer
 git clone https://github.com/lessw2020/Best-Deep-Learning-Optimizers.git
 cp ./Best-Deep-Learning-Optimizers/diffgrad/diffgrad.py ./optimizer/DiffGradOptimizer.py
 rm -rf ./Best-Deep-Learning-Optimizers
-
+cd pipeline
+git clone https://gitlab.com/yathindra/fastai1.git
+cd ..
 cd ..
 
 cp ./adapttext.service /etc/systemd/system/adapttext.service
