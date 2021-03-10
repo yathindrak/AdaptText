@@ -26,7 +26,6 @@ export default function Home() {
   const [logged] = useAuth();
   const [files, setFiles] = useState([]);
   const [pond, setPond] = useState();
-  const [task_id, setTask_id] = useState();
   const [token, setToken] = useState("");
 
   const [title, setTitle] = useState("");
@@ -134,8 +133,7 @@ export default function Home() {
         .then((response) => {
           if (response) {
             let meta_data = response.meta_data;
-            console.log(meta_data);
-            history.push(`/task/${task_id}`);
+            history.push(`/task/${meta_data.task_id}`);
           }
 
           // if (response && response.tasks) {
@@ -173,7 +171,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    setTask_id(1);
     const token = localStorage.getItem("REACT_TOKEN_AUTH_KEY");
     if (!token) {
       history.push(`/login`);
