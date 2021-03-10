@@ -90,6 +90,9 @@ def upload_csv():
     else:
         return make_err_response('Bad Request', 'Invalid file provided', 400)
 
+def update_progress(task_id, progress):
+    database.session.query(Task).filter_by(id=task_id).update({"progress": progress})
+    database.session.commit()
 
 @task_routes.route('/task/execute/<id>', methods=['POST'])
 @auth_required
@@ -117,6 +120,7 @@ def execute(id):
 
     web_socket = Server()
     web_socket.publish(id, 1)
+    update_progress(id, 1)
 
     print("Start building classification model")
     classifierModelFWD, classifierModelBWD, classes = adapt_text.build_classifier(df, text_name, label_name, id,

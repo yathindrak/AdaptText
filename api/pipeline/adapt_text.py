@@ -1,6 +1,8 @@
 import zipfile
 from sklearn.model_selection import train_test_split
 
+from connection.initializers import database
+from models.task import Task
 from ..websocket.server import Server
 from .utils.dropbox_handler import DropboxHandler
 from .utils.zip_handler import ZipHandler
@@ -130,6 +132,10 @@ class AdaptText:
                                       is_gpu=self.is_gpu)
         lmTrainer_bwd.train()
 
+    def update_progress(self, task_id, progress):
+        database.session.query(Task).filter_by(id=task_id).update({"progress": progress})
+        database.session.commit()
+
     def build_classifier(self, df, text_name, label_name, task_id, grad_unfreeze: bool = True, preprocessor=None):
         if (not Path(self.mdl_path).exists()):
             print("Pretrained LM not found, preparing...")
@@ -159,6 +165,7 @@ class AdaptText:
 
         web_socket = Server()
         web_socket.publish(task_id, 3)
+        self.update_progress(task_id, 3)
 
         # forward training
         lmDataBunchLoader = LMDataBunchLoader(df_trn, df_val, text_name, label_name, self.splitting_ratio,
@@ -168,6 +175,7 @@ class AdaptText:
 
         web_socket = Server()
         web_socket.publish(task_id, 7)
+        self.update_progress(task_id, 7)
 
         lmDataBunchLoaderBwd = LMDataBunchLoader(df_trn, df_val, text_name, label_name, self.splitting_ratio,
                                                  self.data_root, continuous_train=self.continuous_train,
@@ -176,6 +184,7 @@ class AdaptText:
 
         web_socket = Server()
         web_socket.publish(task_id, 9)
+        self.update_progress(task_id, 9)
 
         vocab = data_lm.train_ds.vocab
 
@@ -187,6 +196,7 @@ class AdaptText:
 
         web_socket = Server()
         web_socket.publish(task_id, 11)
+        self.update_progress(task_id, 11)
 
         classificationDataBunchLoaderBwd = ClassificationDataBunchLoader(df_trn, df_val, text_name, label_name,
                                                                          self.splitting_ratio, vocab, is_backward=True)
@@ -198,6 +208,7 @@ class AdaptText:
 
         web_socket = Server()
         web_socket.publish(task_id, 13)
+        self.update_progress(task_id, 13)
 
         lmTrainerFwd = LMTrainer(data_lm, self.lm_fns, self.mdl_path, custom_model_store_path, False,
                                  is_gpu=self.is_gpu)
@@ -205,6 +216,7 @@ class AdaptText:
 
         web_socket = Server()
         web_socket.publish(task_id, 38)
+        self.update_progress(task_id, 38)
 
         classifierTrainerFwd = ClassifierTrainer(data_class, self.lm_fns, self.mdl_path, custom_model_store_path, False)
         classifierModelFWD = classifierTrainerFwd.train(grad_unfreeze)
@@ -215,6 +227,7 @@ class AdaptText:
 
         web_socket = Server()
         web_socket.publish(task_id, 63)
+        self.update_progress(task_id, 63)
 
         classifierTrainerBwd = ClassifierTrainer(data_class_bwd, self.lm_fns_bwd, self.mdl_path,
                                                  custom_model_store_path_bwd,
@@ -223,6 +236,7 @@ class AdaptText:
 
         web_socket = Server()
         web_socket.publish(task_id, 88)
+        self.update_progress(task_id, 88)
 
         return classifierModelFWD, classifierModelBWD, classes
 
