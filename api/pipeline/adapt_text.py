@@ -1,5 +1,7 @@
 import zipfile
 from sklearn.model_selection import train_test_split
+
+from ..websocket.server import Server
 from .utils.dropbox_handler import DropboxHandler
 from .utils.zip_handler import ZipHandler
 from .fastai1.basics import *
@@ -128,10 +130,10 @@ class AdaptText:
                                       is_gpu=self.is_gpu)
         lmTrainer_bwd.train()
 
-    def build_classifier(self, df, text_name, label_name, grad_unfreeze: bool = True, preprocessor=None):
+    def build_classifier(self, df, text_name, label_name, task_id, grad_unfreeze: bool = True, preprocessor=None):
         if (not Path(self.mdl_path).exists()):
             print("Pretrained LM not found, preparing...")
-            # below the classifier harcode wont be there for library
+            # below the classifier hardcode wont be there for library
             self.prepare_pretrained_lm("one-outta-three.zip")
 
         df = df[[text_name, label_name]]
@@ -155,15 +157,25 @@ class AdaptText:
 
         df_trn, df_val = train_test_split(df, stratify=df[label_name], test_size=0.1)
 
+        web_socket = Server()
+        web_socket.publish(task_id, 3)
+
         # forward training
         lmDataBunchLoader = LMDataBunchLoader(df_trn, df_val, text_name, label_name, self.splitting_ratio,
                                               self.data_root, continuous_train=self.continuous_train)
+
         data_lm = lmDataBunchLoader.load()
+
+        web_socket = Server()
+        web_socket.publish(task_id, 7)
 
         lmDataBunchLoaderBwd = LMDataBunchLoader(df_trn, df_val, text_name, label_name, self.splitting_ratio,
                                                  self.data_root, continuous_train=self.continuous_train,
                                                  is_backward=True)
         data_lm_bwd = lmDataBunchLoaderBwd.load()
+
+        web_socket = Server()
+        web_socket.publish(task_id, 9)
 
         vocab = data_lm.train_ds.vocab
 
@@ -173,6 +185,9 @@ class AdaptText:
 
         data_class.show_batch()
 
+        web_socket = Server()
+        web_socket.publish(task_id, 11)
+
         classificationDataBunchLoaderBwd = ClassificationDataBunchLoader(df_trn, df_val, text_name, label_name,
                                                                          self.splitting_ratio, vocab, is_backward=True)
         data_class_bwd = classificationDataBunchLoaderBwd.load()
@@ -181,9 +196,15 @@ class AdaptText:
 
         classes = data_class.classes
 
+        web_socket = Server()
+        web_socket.publish(task_id, 13)
+
         lmTrainerFwd = LMTrainer(data_lm, self.lm_fns, self.mdl_path, custom_model_store_path, False,
                                  is_gpu=self.is_gpu)
         languageModelFWD = lmTrainerFwd.train()
+
+        web_socket = Server()
+        web_socket.publish(task_id, 38)
 
         classifierTrainerFwd = ClassifierTrainer(data_class, self.lm_fns, self.mdl_path, custom_model_store_path, False)
         classifierModelFWD = classifierTrainerFwd.train(grad_unfreeze)
@@ -192,10 +213,16 @@ class AdaptText:
                                  is_gpu=self.is_gpu)
         languageModelBWD = lmTrainerBwd.train()
 
+        web_socket = Server()
+        web_socket.publish(task_id, 63)
+
         classifierTrainerBwd = ClassifierTrainer(data_class_bwd, self.lm_fns_bwd, self.mdl_path,
                                                  custom_model_store_path_bwd,
                                                  True)
         classifierModelBWD = classifierTrainerBwd.train(grad_unfreeze)
+
+        web_socket = Server()
+        web_socket.publish(task_id, 88)
 
         return classifierModelFWD, classifierModelBWD, classes
 

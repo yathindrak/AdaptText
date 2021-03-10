@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 import pandas as pd
 import csv
 
+from websocket.server import pusher_server, Server
 from ..pipeline.adapt_text import AdaptText
 from ..pipeline.evaluator.evaluator import Evaluator
 from ..schemas.metainfo import MetaInfoSchema
@@ -114,8 +115,11 @@ def execute(id):
     text_name = meta_info.ds_text_col
     label_name = meta_info.ds_label_col
 
+    web_socket = Server()
+    web_socket.publish(id, 1)
+
     print("Start building classification model")
-    classifierModelFWD, classifierModelBWD, classes = adapt_text.build_classifier(df, text_name, label_name,
+    classifierModelFWD, classifierModelBWD, classes = adapt_text.build_classifier(df, text_name, label_name, id,
                                                                                   grad_unfreeze=False)
 
     evaluator = Evaluator()
