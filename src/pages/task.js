@@ -67,12 +67,12 @@ export default function Task() {
               const channel = pusher.subscribe("upload");
               channel.bind("progress-" + parseInt(task_id), (data) => {
                 if (data.percentage < 100) {
-                  isInProgress(true);
+                  setIsInProgress(true);
                   setProgress(data.percentage);
                 }
 
                 if (data.percentage === 100) {
-                  isInProgress(false);
+                  setIsInProgress(false);
                   setProgress(100);
                   
                   store.addNotification({
@@ -101,12 +101,12 @@ export default function Task() {
               const channel = pusher.subscribe("upload");
               channel.bind("progress-" + parseInt(task_id), (data) => {
                 if (data.percentage < 100) {
-                  isInProgress(true);
+                  setIsInProgress(true);
                   setProgress(data.percentage);
                 }
 
                 if (data.percentage === 100) {
-                  isInProgress(false);
+                  setIsInProgress(false);
                   setProgress(100);
 
                   store.addNotification({
