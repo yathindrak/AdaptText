@@ -1,8 +1,8 @@
 import zipfile
 from sklearn.model_selection import train_test_split
 
-from connection.initializers import database
-from models.task import Task
+from ..connection.initializers import database
+from ..models.task import Task
 from ..websocket.server import Server
 from .utils.dropbox_handler import DropboxHandler
 from .utils.zip_handler import ZipHandler
