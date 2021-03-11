@@ -108,10 +108,7 @@ export default function Home() {
         body: JSON.stringify(req_body),
       })
         .then((response) => {
-          if (response.status === 401) {
-            // setMessage("Sorry you aren't authorized!");
-            return null;
-          } else if (response.status === 400) {
+          if (response.status === 400) {
             // setMessage("Sorry you aren't authorized!");
             store.addNotification({
               title: "Error",

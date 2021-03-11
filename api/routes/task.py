@@ -16,6 +16,12 @@ from ..models.task import Task
 from ..utils.http_utils import make_err_response
 from ..connection.initializers import guard, database
 
+from io import BytesIO
+from flask import Flask, send_file
+import numpy as np
+from skimage.io import imsave
+import matplotlib.pyplot as plt
+
 task_routes = Blueprint('task', __name__)
 
 
@@ -90,9 +96,11 @@ def upload_csv():
     else:
         return make_err_response('Bad Request', 'Invalid file provided', 400)
 
+
 def update_progress(task_id, progress):
     database.session.query(Task).filter_by(id=task_id).update({"progress": progress})
     database.session.commit()
+
 
 @task_routes.route('/task/execute/<id>', methods=['POST'])
 @auth_required
@@ -129,11 +137,22 @@ def execute(id):
     evaluator = Evaluator()
 
     print("Ensemble classifier analysis")
-    accuracy, err, roc_auc = evaluator.evaluate_ensemble(classifierModelFWD, classifierModelBWD)
+    accuracy, err, xlim, ylim, fpr, tpr, roc_auc, conf_matrix, macro_f1, macro_precision, macro_recall, macro_support, \
+    weighted_f1, weighted_precision, weighted_recall, weighted_support = evaluator.evaluate_ensemble(
+        classifierModelFWD, classifierModelBWD)
 
     print('accuracy : ' + accuracy)
     print('err : ' + err)
     print('roc auc : ' + roc_auc)
+    print(conf_matrix)
+
+    database.session.query(MetaInfo).filter_by(task_id=id).update(
+        {"accuracy": accuracy, "err": err, "xlim": xlim, "ylim": ylim, "fpr": fpr, "tpr": tpr, "roc_auc": roc_auc,
+         "conf_matrix": conf_matrix, "macro_f1": macro_f1, "macro_precision": macro_precision, "macro_recall": macro_recall,
+         "macro_support": macro_support, "weighted_f1": weighted_f1, "weighted_precision": weighted_precision,
+         "weighted_recall": weighted_recall, "weighted_support": weighted_support})
+
+    database.session.commit()
 
     # return make_response(jsonify({"accuracy": accuracy, "err": err}), 201)
     return make_response('', 204)
@@ -180,6 +199,12 @@ def execute(id):
 @auth_required
 def get_by_id(id):
     get_task = Task.query.get(id)
+
+    current_user = User.lookup(flask_praetorian.current_user().username)
+
+    if get_task.user_id == current_user.id:
+        return make_err_response('Not found', 'Task not found', 404)
+
     task_schema = TaskSchema()
     task = task_schema.dump(get_task)
     return make_response(jsonify({"task": task}))
@@ -229,6 +254,7 @@ def update_by_id(id):
     task = task_schema.dump(get_task)
     return make_response(jsonify({"task": task}))
 
+
 # @task_routes.route('/protected')
 # @auth_required
 # def protected():
@@ -248,3 +274,28 @@ def update_by_id(id):
 #
 #     token = guard.refresh_jwt_token(prev_token)
 #     return jsonify({'access_token': token})
+
+@task_routes.route('/plot')
+def generate_plot():
+    """
+    Return a matplotlib plot as a png by
+    saving it into a StringIO and using send_file.
+    """
+
+    def using_matplotlib():
+        fig = plt.figure(figsize=(6, 6), dpi=300)
+        ax = fig.add_subplot(111)
+        x = np.random.randn(500)
+        y = np.random.randn(500)
+        ax.plot(x, y, '.', color='r', markersize=10, alpha=0.2)
+        ax.set_title('Behold')
+
+        # strIO = StringIO()
+        strIO = BytesIO()
+        plt.savefig(strIO, dpi=fig.dpi)
+        strIO.seek(0)
+        return strIO
+
+    strIO = using_matplotlib()
+    # img = Image.open
+    return send_file(strIO, mimetype='image/png')

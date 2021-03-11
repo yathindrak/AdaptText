@@ -16,6 +16,7 @@ import Home from "./pages/home";
 import Tasks from "./pages/tasks";
 import "./App.css";
 import Task from "./pages/task";
+import Metrics from "./pages/metrics";
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
   const [logged] = useAuth();
@@ -52,6 +53,7 @@ export default function App() {
         <Switch>
           <LoginRoute path="/login" component={Login} />
           <PrivateRoute path="/tasks" component={Tasks} />
+          <PrivateRoute path="/task/metrics/:id" component={Metrics} />
           <PrivateRoute path="/task/:id" component={Task} />
           <PrivateRoute path="/" component={Home} />
         </Switch>

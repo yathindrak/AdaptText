@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { store } from "react-notifications-component";
-import { Progress } from "shards-react";
+import { Button, Progress } from "shards-react";
 import { useRouteMatch } from "react-router-dom";
 import Pusher from "pusher-js";
 import { useHistory } from "react-router-dom";
-import { login, authFetch, useAuth, logout } from "../auth";
+import { authFetch, useAuth } from "../auth";
 import NavigationBar from "../components/navbar";
 
 export default function Task() {
   const [logged] = useAuth();
   const history = useHistory();
-  const [tasks, setTasks] = useState([]);
   let task_obj = useRouteMatch("/task/:id");
   let task_id = task_obj?.params?.id;
   const [task, setTask] = useState();
@@ -25,10 +24,7 @@ export default function Task() {
         },
       })
         .then((response) => {
-          if (response.status === 401) {
-            // setMessage("Sorry you aren't authorized!");
-            return null;
-          } else if (response.status === 400) {
+          if ((response.status === 400) || (response.status === 404)) {
             history.push(`/`);
             return null;
           }
@@ -74,7 +70,7 @@ export default function Task() {
                 if (data.percentage === 100) {
                   setIsInProgress(false);
                   setProgress(100);
-                  
+
                   store.addNotification({
                     title: "Congratulations !!!",
                     message: "Building the classifier is completed",
@@ -132,6 +128,12 @@ export default function Task() {
     }
   }, []);
 
+  const onDisplayMetrices = (event) => {
+    if (!isInProgress) {
+      history.push(`/task/metrics/${parseInt(task_id)}`);
+    }
+  };
+
   return (
     <>
       {logged ? (
@@ -155,13 +157,27 @@ export default function Task() {
                 Training Completed !!!
               </h4>
             )}
-            <p className="mt-3 mb-5" style={{ fontWeight: "400" }}>
+            <p className="mt-3 mb-5 ml-4" style={{ fontWeight: "400" }}>
               This process will take several minutes based on the dataset you
               have provided.
             </p>
-            <Progress style={{ width: "60vw" }} theme={isInProgress ? "primary" : "success"} value={progress} animated>
+            <Progress
+              className="mb-5"
+              style={{ width: "60vw" }}
+              theme={isInProgress ? "primary" : "success"}
+              value={progress}
+              animated
+            >
               {progress}
             </Progress>
+            <Button
+              onClick={onDisplayMetrices}
+              style={{ width: "20rem" }}
+              className="mt-5"
+              disabled={isInProgress ? true : false}
+            >
+              Display Metrics &rarr;
+            </Button>
           </div>
         </>
       ) : null}

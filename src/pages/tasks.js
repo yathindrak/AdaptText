@@ -17,10 +17,6 @@ export default function Tasks() {
       },
     })
       .then((response) => {
-        if (response.status === 401) {
-          // setMessage("Sorry you aren't authorized!");
-          return null;
-        }
         return response.json();
       })
       .then((response) => {

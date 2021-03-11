@@ -9,6 +9,19 @@ class MetaInfo(db.Model):
     continuous_train = db.Column(db.Boolean, nullable=False)
     accuracy = db.Column(db.Float)
     err = db.Column(db.Float)
+    xlim = db.Column(db.ARRAY(db.Float)),
+    ylim = db.Column(db.ARRAY(db.Float)),
+    fpr = db.Column(db.ARRAY(db.Float)),
+    tpr = db.Column(db.ARRAY(db.Float)),
     roc_auc = db.Column(db.Float)
+    conf_matrix = db.Column(db.ARRAY(db.Integer))
+    macro_f1 = db.Column(db.Float)
+    macro_precision = db.Column(db.Float)
+    macro_recall = db.Column(db.Float)
+    macro_support = db.Column(db.Float)
+    weighted_f1 = db.Column(db.Float)
+    weighted_precision = db.Column(db.Float)
+    weighted_recall = db.Column(db.Float)
+    weighted_support = db.Column(db.Float)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
 
