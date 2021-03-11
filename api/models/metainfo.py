@@ -9,10 +9,10 @@ class MetaInfo(db.Model):
     continuous_train = db.Column(db.Boolean, nullable=False)
     accuracy = db.Column(db.Float)
     err = db.Column(db.Float)
-    xlim = db.Column(db.ARRAY(db.Float)),
-    ylim = db.Column(db.ARRAY(db.Float)),
-    fpr = db.Column(db.ARRAY(db.Float)),
-    tpr = db.Column(db.ARRAY(db.Float)),
+    xlim = db.Column(db.ARRAY(db.Float))
+    ylim = db.Column(db.ARRAY(db.Float))
+    fpr = db.Column(db.ARRAY(db.Float))
+    tpr = db.Column(db.ARRAY(db.Float))
     roc_auc = db.Column(db.Float)
     conf_matrix = db.Column(db.ARRAY(db.Integer))
     macro_f1 = db.Column(db.Float)

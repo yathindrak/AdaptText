@@ -19,7 +19,6 @@ from ..connection.initializers import guard, database
 from io import BytesIO
 from flask import Flask, send_file
 import numpy as np
-from skimage.io import imsave
 import matplotlib.pyplot as plt
 
 task_routes = Blueprint('task', __name__)
@@ -202,7 +201,7 @@ def get_by_id(id):
 
     current_user = User.lookup(flask_praetorian.current_user().username)
 
-    if get_task.user_id == current_user.id:
+    if get_task.user_id != current_user.id:
         return make_err_response('Not found', 'Task not found', 404)
 
     task_schema = TaskSchema()
