@@ -329,7 +329,7 @@ export default function Home() {
                 width="16"
                 height="16"
                 fill="currentColor"
-                class="bi bi-info-circle-fill"
+                className="bi bi-info-circle-fill"
                 viewBox="0 0 16 16"
                 style={{ marginTop: "2px", marginLeft: "6px" }}
               >

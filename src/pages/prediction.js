@@ -25,7 +25,7 @@ registerPlugin(FilePondPluginFileValidateType);
 
 export default function Prediction() {
   const [logged] = useAuth();
-  let task_obj = useRouteMatch("/task/metrics/:id");
+  let task_obj = useRouteMatch("/prediction/:id");
   let task_id = task_obj?.params?.id;
   const [token, setToken] = useState("");
 
@@ -126,7 +126,7 @@ export default function Prediction() {
     setToken(JSON.parse(token).access_token);
 
     if (task_id) {
-      authFetch(`/api/prediction/${task_id}`, {
+      authFetch(`/api/prediction/${parseInt(task_id)}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
