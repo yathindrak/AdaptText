@@ -140,18 +140,63 @@ def execute(id):
     weighted_f1, weighted_precision, weighted_recall, weighted_support = evaluator.evaluate_ensemble(
         classifierModelFWD, classifierModelBWD)
 
-    print('accuracy : ' + accuracy)
-    print('err : ' + err)
-    print('roc auc : ' + roc_auc)
+    web_socket.publish(id, 96)
+    update_progress(id, 96)
+
+    # print('accuracy : ' + accuracy)
+    # print('err : ' + err)
     print(conf_matrix)
+    # print('roc auc : ' + roc_auc)
+    # print(conf_matrix)
 
-    database.session.query(MetaInfo).filter_by(task_id=id).update(
-        {"accuracy": accuracy, "err": err, "xlim": xlim, "ylim": ylim, "fpr": fpr, "tpr": tpr, "roc_auc": roc_auc,
-         "conf_matrix": conf_matrix, "macro_f1": macro_f1, "macro_precision": macro_precision, "macro_recall": macro_recall,
-         "macro_support": macro_support, "weighted_f1": weighted_f1, "weighted_precision": weighted_precision,
-         "weighted_recall": weighted_recall, "weighted_support": weighted_support})
+    # print("start updating metrics under metainfo")
+    # database.session.query(MetaInfo).filter_by(task_id=id).update(
+    #     {"accuracy": accuracy, "err": err, "xlim": xlim, "ylim": ylim, "fpr": fpr, "tpr": tpr, "roc_auc": roc_auc,
+    #      "conf_matrix": conf_matrix, "macro_f1": macro_f1, "macro_precision": macro_precision, "macro_recall": macro_recall,
+    #      "macro_support": macro_support, "weighted_f1": weighted_f1, "weighted_precision": weighted_precision,
+    #      "weighted_recall": weighted_recall, "weighted_support": weighted_support})
 
-    database.session.commit()
+    print(classes)
+    print(type(classes))
+    print("start updating metrics under metainfo")
+    try:
+        meta_info = MetaInfo.query.filter_by(task_id=id).first()
+        # setattr(meta_info, 'ds_path', 'aassdaasd')
+        setattr(meta_info, 'accuracy', accuracy.item())
+        setattr(meta_info, 'err', err.item())
+        setattr(meta_info, 'xlim', xlim)
+        setattr(meta_info, 'ylim', ylim)
+        setattr(meta_info, 'fpr', fpr.tolist())
+        setattr(meta_info, 'tpr', tpr.tolist())
+        setattr(meta_info, 'roc_auc', roc_auc.item())
+        setattr(meta_info, 'conf_matrix', conf_matrix.tolist())
+        setattr(meta_info, 'macro_f1', macro_f1)
+        setattr(meta_info, 'macro_precision', macro_precision)
+        setattr(meta_info, 'macro_recall', macro_recall)
+        setattr(meta_info, 'macro_support', macro_support)
+        setattr(meta_info, 'weighted_f1', weighted_f1)
+        setattr(meta_info, 'weighted_precision', weighted_precision)
+        setattr(meta_info, 'weighted_recall', weighted_recall)
+        setattr(meta_info, 'weighted_support', weighted_support)
+        setattr(meta_info, 'classes', classes)
+
+        meta_info = database.session.merge(meta_info)
+        database.session.commit()
+    except Exception as e:
+        print(e)
+    finally:
+        database.session.close()
+    # database.session.query(MetaInfo).filter_by(task_id=id).update(
+    # { >
+    # database.session.query(MetaInfo).filter_by(task_id=id).update({"accuracy": accuracy, "err": err})
+    print("commiting updating metrics under metainfo")
+
+    # database.session.commit()
+
+    web_socket.publish(id, 100)
+    update_progress(id, 100)
+
+    print("done updating metrics under metainfo")
 
     # return make_response(jsonify({"accuracy": accuracy, "err": err}), 201)
     return make_response('', 204)
@@ -254,9 +299,24 @@ def update_by_id(id):
     return make_response(jsonify({"task": task}))
 
 
-# @task_routes.route('/protected')
-# @auth_required
+# @task_routes.route('/protectedd')
 # def protected():
+#     try:
+#         print('take 00')
+#         # obj = database.session.query(MetaInfo).filter_by(task_id=1)
+#         meta_info = MetaInfo.query.filter_by(task_id=1).first()
+#         print('met')
+#         print(meta_info)
+#         setattr(meta_info, 'ds_path', 'aassdaasd')
+#         setattr(meta_info, 'accuracy', 1)
+#
+#         meta_info = database.session.merge(meta_info)
+#         # print(meta_info.accuracy)
+#         database.session.commit()
+#     except Exception as e:
+#         print(e)
+#     finally:
+#         database.session.close()
 #     return jsonify({'result': 'You are in a special area!'}), 200
 #
 #
@@ -274,27 +334,37 @@ def update_by_id(id):
 #     token = guard.refresh_jwt_token(prev_token)
 #     return jsonify({'access_token': token})
 
-@task_routes.route('/plot')
-def generate_plot():
-    """
-    Return a matplotlib plot as a png by
-    saving it into a StringIO and using send_file.
-    """
+@task_routes.route('/plot_roc/<id>')
+def plot_roc(id):
+    meta_info = MetaInfo.query.filter_by(task_id=id).first()
 
-    def using_matplotlib():
-        fig = plt.figure(figsize=(6, 6), dpi=300)
-        ax = fig.add_subplot(111)
-        x = np.random.randn(500)
-        y = np.random.randn(500)
-        ax.plot(x, y, '.', color='r', markersize=10, alpha=0.2)
-        ax.set_title('Behold')
+    evaluator = Evaluator()
+    roc_figure = evaluator.draw_roc_curve(meta_info.xlim, meta_info.ylim, meta_info.fpr, meta_info.tpr, meta_info.roc_auc)
+    bytes = BytesIO()
+    plt.savefig(bytes, dpi=roc_figure.dpi)
+    bytes.seek(0)
 
-        # strIO = StringIO()
-        strIO = BytesIO()
-        plt.savefig(strIO, dpi=fig.dpi)
-        strIO.seek(0)
-        return strIO
+    return send_file(bytes, mimetype='image/png')
 
-    strIO = using_matplotlib()
-    # img = Image.open
-    return send_file(strIO, mimetype='image/png')
+    # """
+    # Return a matplotlib plot as a png by
+    # saving it into a StringIO and using send_file.
+    # """
+    #
+    # def using_matplotlib():
+    #     fig = plt.figure(figsize=(6, 6), dpi=300)
+    #     ax = fig.add_subplot(111)
+    #     x = np.random.randn(500)
+    #     y = np.random.randn(500)
+    #     ax.plot(x, y, '.', color='r', markersize=10, alpha=0.2)
+    #     ax.set_title('Behold')
+    #
+    #     # bytes = StringIO()
+    #     bytes = BytesIO()
+    #     plt.savefig(bytes, dpi=fig.dpi)
+    #     bytes.seek(0)
+    #     return bytes
+    #
+    # bytes = using_matplotlib()
+    # # img = Image.open
+    # return send_file(bytes, mimetype='image/png')
