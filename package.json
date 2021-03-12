@@ -3,11 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@nivo/core": "^0.67.0",
+    "@nivo/heatmap": "^0.67.0",
+    "@nivo/pie": "^0.67.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "filepond": "^4.25.1",
     "filepond-plugin-file-validate-type": "^1.2.5",
+    "pusher": "^5.0.0",
+    "pusher-js": "^4.3.1",
     "react": "^17.0.1",
     "react-data-table-component": "^6.11.7",
     "react-dom": "^17.0.1",
@@ -18,9 +23,7 @@
     "react-token-auth": "^1.1.8",
     "shards-react": "^1.0.3",
     "styled-components": "^5.2.1",
-    "web-vitals": "^1.0.1",
-    "pusher": "^5.0.0",
-    "pusher-js": "^4.3.1"
+    "web-vitals": "^1.0.1"
   },
   "proxy": "http://localhost:5000",
   "scripts": {

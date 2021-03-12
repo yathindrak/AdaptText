@@ -127,4 +127,6 @@ class Evaluator():
         plt.title('Receiver operating characteristic')
         plt.legend(loc="lower right")
 
+        return fig
+
 
