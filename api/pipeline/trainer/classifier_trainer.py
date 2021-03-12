@@ -7,11 +7,13 @@ from ..optimizer.DiffGradOptimizer import DiffGrad
 
 
 class ClassifierTrainer(Trainer):
-    def __init__(self, data, lm_fns, mdl_path, model_store_path, is_backward=False, drop_mult=0.5, lang='si'):
+    def __init__(self, data, lm_fns, mdl_path, model_store_path, classifiers_store_path, task_id, is_backward=False, drop_mult=0.5, lang='si'):
         self.data = data
         self.lm_fns = lm_fns
         self.mdl_path = mdl_path
         self.model_store_path = model_store_path
+        self.classifiers_store_path = classifiers_store_path
+        self.task_id = task_id
         self.is_backward = is_backward
         self.drop_mult = drop_mult
         self.lang = lang
@@ -89,7 +91,11 @@ class ClassifierTrainer(Trainer):
 
         if self.is_backward:
             learn.save(f'{self.lang}_clas_bwd')
+            pkl_name = self.classifiers_store_path[1] + self.task_id + ".pkl"
+            learn.export(pkl_name)
         else:
             learn.save(f'{self.lang}_clas')
+            pkl_name = self.classifiers_store_path[0] + self.task_id + ".pkl"
+            learn.export(pkl_name)
 
         return learn

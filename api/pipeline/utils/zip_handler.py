@@ -15,10 +15,13 @@ class ZipHandler:
             zip_archive.write(file_name)
         zip_archive.close()
 
-    def unzip(self, file_name):
+    def unzip(self, file_name, destination=None):
         current_working_dir = os.getcwd()
         with zipfile.ZipFile(file_name, 'r') as archive:
-            archive.extractall(current_working_dir)
+            if destination:
+                archive.extractall(destination)
+            else:
+                archive.extractall(current_working_dir)
 
     def prepare_articles(self, path):
         base_lm_data_path = path / 'articles'

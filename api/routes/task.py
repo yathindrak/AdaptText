@@ -348,43 +348,21 @@ def plot_roc(id):
 
     return send_file(bytes, mimetype='image/png')
 
-@task_routes.route('/download')
-def download_classifier():
-    lang = 'si'
-    app_root = "/storage"
-    bs = 128
-    splitting_ratio = 0.1
-    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=False)
-
-    zip_file_name = "classifier.zip"
-    adapt_text.download_classifier(zip_file_name)
-
-    with open(zip_file_name, 'rb') as f:
-        data = f.readlines()
-    os.remove(zip_file_name)
-    return Response(data, headers={
-        'Content-Type': 'application/zip',
-        'Content-Disposition': 'attachment; filename=%s;' % zip_file_name
-    })
-    # """
-    # Return a matplotlib plot as a png by
-    # saving it into a StringIO and using send_file.
-    # """
-    #
-    # def using_matplotlib():
-    #     fig = plt.figure(figsize=(6, 6), dpi=300)
-    #     ax = fig.add_subplot(111)
-    #     x = np.random.randn(500)
-    #     y = np.random.randn(500)
-    #     ax.plot(x, y, '.', color='r', markersize=10, alpha=0.2)
-    #     ax.set_title('Behold')
-    #
-    #     # bytes = StringIO()
-    #     bytes = BytesIO()
-    #     plt.savefig(bytes, dpi=fig.dpi)
-    #     bytes.seek(0)
-    #     return bytes
-    #
-    # bytes = using_matplotlib()
-    # # img = Image.open
-    # return send_file(bytes, mimetype='image/png')
+# @task_routes.route('/download')
+# def download_classifier():
+#     lang = 'si'
+#     app_root = "/storage"
+#     bs = 128
+#     splitting_ratio = 0.1
+#     adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=False)
+#
+#     zip_file_name = "classifier.zip"
+#     adapt_text.download_classifier(zip_file_name)
+#
+#     with open(zip_file_name, 'rb') as f:
+#         data = f.readlines()
+#     os.remove(zip_file_name)
+#     return Response(data, headers={
+#         'Content-Type': 'application/zip',
+#         'Content-Disposition': 'attachment; filename=%s;' % zip_file_name
+#     })

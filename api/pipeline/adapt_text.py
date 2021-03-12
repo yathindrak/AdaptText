@@ -37,7 +37,7 @@ class AdaptText:
                               f'{data_root}/data/{lang}wiki/models/si_wt_vocab_bwd.pkl',
                               f'{data_root}/data/{lang}wiki/models/si_wt_bwd.pth']
         self.lm_store_files = ['si_wt_vocab.pkl', 'si_wt.pth', 'si_wt_vocab_bwd.pkl', 'si_wt_bwd.pth']
-        self.classifiers_store_path = ["models/fwd-export.pkl", "models/bwd-export.pkl"]
+        self.classifiers_store_path = ["models/fwd-export", "models/bwd-export"]
         self.continuous_train = continuous_train
 
         if not torch.cuda.is_available():
@@ -219,7 +219,7 @@ class AdaptText:
         web_socket.publish(task_id, 38)
         self.update_progress(task_id, 38)
 
-        classifierTrainerFwd = ClassifierTrainer(data_class, self.lm_fns, self.mdl_path, custom_model_store_path, False)
+        classifierTrainerFwd = ClassifierTrainer(data_class, self.lm_fns, self.mdl_path, custom_model_store_path, self.classifiers_store_path, task_id, False)
         classifierModelFWD = classifierTrainerFwd.train(grad_unfreeze)
 
         lmTrainerBwd = LMTrainer(data_lm_bwd, self.lm_fns_bwd, self.mdl_path, custom_model_store_path_bwd, True,
@@ -231,13 +231,31 @@ class AdaptText:
         self.update_progress(task_id, 63)
 
         classifierTrainerBwd = ClassifierTrainer(data_class_bwd, self.lm_fns_bwd, self.mdl_path,
-                                                 custom_model_store_path_bwd,
+                                                 custom_model_store_path_bwd, self.classifiers_store_path, task_id,
                                                  True)
         classifierModelBWD = classifierTrainerBwd.train(grad_unfreeze)
 
         web_socket = Server()
-        web_socket.publish(task_id, 88)
-        self.update_progress(task_id, 88)
+        web_socket.publish(task_id, 80)
+        self.update_progress(task_id, 80)
+
+        classifier_zip_file_name = "classifier_"+task_id+".zip"
+        dropbox_classifier_zip_path = f'/adapttext/models/{classifier_zip_file_name}'
+
+        zip_archive = zipfile.ZipFile(classifier_zip_file_name, 'w', zipfile.ZIP_DEFLATED)
+        for item in self.classifiers_store_path:
+            pkl_name = item+task_id+".pkl"
+            zip_archive.write(pkl_name)
+        zip_archive.close()
+
+        dropbox_handler = DropboxHandler(self.data_root)
+        dropbox_handler.upload_zip_file(classifier_zip_file_name, dropbox_classifier_zip_path)
+
+        database.session.query(Task).filter_by(id=task_id).update({"model_path": dropbox_classifier_zip_path})
+        database.session.commit()
+
+        web_socket.publish(task_id, 80)
+        self.update_progress(task_id, 80)
 
         return classifierModelFWD, classifierModelBWD, classes
 
@@ -251,12 +269,13 @@ class AdaptText:
         dropbox_handler = DropboxHandler(self.data_root)
         dropbox_handler.upload_zip_file(zip_file_name, f'/adapttext/models/{zip_file_name}')
 
-    def download_classifier(self, zip_file_name):
-        # zip_file_name = "test.zip"
-        zip_archive = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
-        for item in self.classifiers_store_path:
-            zip_archive.write(item)
-        zip_archive.close()
+    # def download_classifier(self, zip_file_name):
+    #     # zip_file_name = "test.zip"
+    #     zip_archive = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
+    #     for item in self.classifiers_store_path:
+    #         pkl_name = item + task_id + ".pkl"
+    #         zip_archive.write(pkl_name)
+    #     zip_archive.close()
 
         # response = make_response(zip_file_name.read())
         # response.headers.set('Content-Type', 'zip')
