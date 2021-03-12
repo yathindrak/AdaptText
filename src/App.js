@@ -56,7 +56,7 @@ export default function App() {
           <PrivateRoute path="/tasks" component={Tasks} />
           <PrivateRoute path="/task/metrics/:id" component={Metrics} />
           <PrivateRoute path="/task/:id" component={Task} />
-          <PrivateRoute path="/prediction" component={Prediction} />
+          <PrivateRoute path="/prediction/:id" component={Prediction} />
           <PrivateRoute path="/" component={Home} />
         </Switch>
       </div>
