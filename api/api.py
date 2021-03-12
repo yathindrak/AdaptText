@@ -4,6 +4,7 @@ from flask import Flask
 import flask_cors
 import logging
 
+from .routes.prediction import prediction_routes
 from .commands import init_database, add_user
 from .connection.initializers import database, guard
 from .models.user import User
@@ -34,6 +35,7 @@ app.cli.add_command(add_user)
 
 app.register_blueprint(auth_routes, url_prefix='/api')
 app.register_blueprint(task_routes, url_prefix='/api')
+app.register_blueprint(prediction_routes, url_prefix='/api')
 
 if __name__ == '__main__':
     app.run(debug=True)
