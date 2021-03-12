@@ -1,8 +1,10 @@
 from pathlib import Path
 
 import flask_praetorian
-from flask import Blueprint, make_response
+from flask import Blueprint, make_response, jsonify
 from flask_praetorian import auth_required
+
+from ..pipeline.fastai1.basic_train import load_learner
 from ..pipeline.predictor.predictor import Predictor
 from ..pipeline.utils.dropbox_handler import DropboxHandler
 from ..pipeline.utils.zip_handler import ZipHandler
@@ -17,7 +19,6 @@ prediction_routes = Blueprint('prediction', __name__)
 @prediction_routes.route('/prediction/<id>')
 @auth_required
 def load_classifier(id):
-
     get_task = Task.query.get(id)
 
     current_user = User.lookup(flask_praetorian.current_user().username)
@@ -30,7 +31,7 @@ def load_classifier(id):
     model_file_name = model_path.split("/")[-1]
     classifier_root = "/classification/"
 
-    if Path(classifier_root+model_file_name).exists():
+    if Path(classifier_root + model_file_name).exists():
         return make_response('model already exists', 200)
 
     print("classification model {} not found locally; try downloading...", model_file_name)
@@ -58,14 +59,14 @@ def predict(task_id, text):
 
     meta_info = MetaInfo.query.filter_by(task_id=task_id).first()
 
-    classifier_root = "/classification/"
-    classifiers_store_path = [classifier_root+"models/fwd-export", classifier_root+"models/bwd-export"]
+    classifier_dir = "/classification/models/"
+    classifiers_store_path = ["fwd-export", "bwd-export"]
 
-    learn_classifier_fwd = classifiers_store_path[0] + get_task.id + ".pkl"
-    learn_classifier_bwd = classifiers_store_path[1] + get_task.id + ".pkl"
+    learn_classifier_fwd = load_learner(classifier_dir, classifiers_store_path[0] + str(get_task.id) + ".pkl")
+    learn_classifier_bwd = load_learner(classifier_dir, classifiers_store_path[1] + str(get_task.id) + ".pkl")
 
     predictor = Predictor(learn_classifier_fwd, learn_classifier_bwd, meta_info.classes)
 
-    prediction = predictor.predict()
+    prediction = predictor.predict(text)
 
-    return make_response(prediction, 200)
+    return jsonify({'predicted_label': prediction[0]}), 200

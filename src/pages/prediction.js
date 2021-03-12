@@ -72,18 +72,12 @@ export default function Prediction() {
               },
             });
             return null;
-          } else if (response.status === 200) {
-            console.log(response);
-            // model already exists
-            setPrediction(response);
-          } else {
-            setPrediction("");
           }
           return response.json();
         })
         .then((response) => {
           if (response) {
-            console.log(response);
+            setPrediction(response['predicted_label']);
           }
           // if (response && response.tasks) {
           //   let tasks_arr = response.tasks.map((item) => {
@@ -204,7 +198,7 @@ export default function Prediction() {
             </div>
 
             <p className="mt-3">{subText}</p>
-            <h5 className="mt-5">Prediction class: {prediction}</h5>
+            <h5 className="mt-5">Predicted class: {prediction}</h5>
           </div>
         </>
       ) : null}
