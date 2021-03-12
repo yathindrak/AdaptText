@@ -10,6 +10,8 @@
 mkdir /storage
 chmod 777 /storage
 mkdir /downloads
+mkdir /classification
+chmod 777 /classification
 
 # setup instance
 #commented out below scripts temp

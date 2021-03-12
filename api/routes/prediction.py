@@ -28,7 +28,7 @@ def load_classifier(id):
     model_path = get_task.model_path
 
     model_file_name = model_path.split("/")[-1]
-    classifier_root = "/classfication/"
+    classifier_root = "/classification/"
 
     if Path(classifier_root+model_file_name).exists():
         return make_response('model already exists', 200)
@@ -41,7 +41,7 @@ def load_classifier(id):
 
     # unzip
     zipHandler = ZipHandler()
-    zipHandler.unzip(destination, destination=destination)
+    zipHandler.unzip(destination, destination=classifier_root)
 
     return make_response('model downloaded', 201)
 
@@ -58,7 +58,8 @@ def predict(task_id, text):
 
     meta_info = MetaInfo.query.filter_by(task_id=task_id).first()
 
-    classifiers_store_path = ["models/fwd-export", "models/bwd-export"]
+    classifier_root = "/classification/"
+    classifiers_store_path = [classifier_root+"models/fwd-export", classifier_root+"models/bwd-export"]
 
     learn_classifier_fwd = classifiers_store_path[0] + get_task.id + ".pkl"
     learn_classifier_bwd = classifiers_store_path[1] + get_task.id + ".pkl"
