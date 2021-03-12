@@ -7,7 +7,8 @@ from ..models.task import Task
 class TaskSchema(ModelSchema):
     class Meta(ModelSchema.Meta):
         fields = ('id', 'name', 'description', 'progress', 'model_path', 'date_created', 'user_id',
-                  'meta_data.ds_path', 'meta_data.ds_text_col', 'meta_data.ds_label_col', 'meta_data.accuracy',
+                  'meta_data.ds_path', 'meta_data.ds_text_col', 'meta_data.ds_label_col', 'meta_data.classes',
+                  'meta_data.accuracy',
                   'meta_data.err', 'meta_data.xlim', 'meta_data.ylim', 'meta_data.fpr', 'meta_data.tpr',
                   'meta_data.tpr', 'meta_data.roc_auc', 'meta_data.conf_matrix', 'meta_data.macro_f1',
                   'meta_data.macro_precision', 'meta_data.macro_recall', 'meta_data.macro_support',

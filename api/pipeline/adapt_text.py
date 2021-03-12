@@ -1,4 +1,5 @@
 import zipfile
+
 from sklearn.model_selection import train_test_split
 
 from ..connection.initializers import database
@@ -249,3 +250,18 @@ class AdaptText:
 
         dropbox_handler = DropboxHandler(self.data_root)
         dropbox_handler.upload_zip_file(zip_file_name, f'/adapttext/models/{zip_file_name}')
+
+    def download_classifier(self, zip_file_name):
+        # zip_file_name = "test.zip"
+        zip_archive = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
+        for item in self.classifiers_store_path:
+            zip_archive.write(item)
+        zip_archive.close()
+
+        # response = make_response(zip_file_name.read())
+        # response.headers.set('Content-Type', 'zip')
+        # response.headers.set('Content-Disposition', 'attachment', filename='%s.zip' % os.path.basename(FILEPATH))
+        # return response
+
+        # dropbox_handler = DropboxHandler(self.data_root)
+        # dropbox_handler.upload_zip_file(zip_file_name, f'/adapttext/models/{zip_file_name}')

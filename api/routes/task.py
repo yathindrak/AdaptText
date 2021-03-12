@@ -1,5 +1,7 @@
+import os
+
 import flask_praetorian
-from flask import Blueprint, jsonify, request, make_response, abort
+from flask import Blueprint, jsonify, request, make_response, abort, Response
 from flask_praetorian import auth_required
 from sqlalchemy.exc import IntegrityError
 import pandas as pd
@@ -164,6 +166,7 @@ def execute(id):
         # setattr(meta_info, 'ds_path', 'aassdaasd')
         setattr(meta_info, 'accuracy', accuracy.item())
         setattr(meta_info, 'err', err.item())
+        setattr(meta_info, 'classes', classes)
         setattr(meta_info, 'xlim', xlim)
         setattr(meta_info, 'ylim', ylim)
         setattr(meta_info, 'fpr', fpr.tolist())
@@ -178,7 +181,6 @@ def execute(id):
         setattr(meta_info, 'weighted_precision', weighted_precision)
         setattr(meta_info, 'weighted_recall', weighted_recall)
         setattr(meta_info, 'weighted_support', weighted_support)
-        setattr(meta_info, 'classes', classes)
 
         meta_info = database.session.merge(meta_info)
         database.session.commit()
@@ -346,6 +348,24 @@ def plot_roc(id):
 
     return send_file(bytes, mimetype='image/png')
 
+@task_routes.route('/download')
+def download_classifier():
+    lang = 'si'
+    app_root = "/storage"
+    bs = 128
+    splitting_ratio = 0.1
+    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=False)
+
+    zip_file_name = "classifier.zip"
+    adapt_text.download_classifier(zip_file_name)
+
+    with open(zip_file_name, 'rb') as f:
+        data = f.readlines()
+    os.remove(zip_file_name)
+    return Response(data, headers={
+        'Content-Type': 'application/zip',
+        'Content-Disposition': 'attachment; filename=%s;' % zip_file_name
+    })
     # """
     # Return a matplotlib plot as a png by
     # saving it into a StringIO and using send_file.
