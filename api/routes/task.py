@@ -128,7 +128,7 @@ def execute(id):
     label_name = meta_info.ds_label_col
 
     web_socket = Server()
-    web_socket.publish(id, 1)
+    web_socket.publish_classifier_progress(id, 1)
     update_progress(id, 1)
 
     print("Start building classification model")
@@ -142,7 +142,7 @@ def execute(id):
     weighted_f1, weighted_precision, weighted_recall, weighted_support = evaluator.evaluate_ensemble(
         classifierModelFWD, classifierModelBWD)
 
-    web_socket.publish(id, 96)
+    web_socket.publish_classifier_progress(id, 96)
     update_progress(id, 96)
 
     # print('accuracy : ' + accuracy)
@@ -195,7 +195,7 @@ def execute(id):
 
     # database.session.commit()
 
-    web_socket.publish(id, 100)
+    web_socket.publish_classifier_progress(id, 100)
     update_progress(id, 100)
 
     print("done updating metrics under metainfo")
@@ -255,6 +255,25 @@ def get_by_id(id):
     task = task_schema.dump(get_task)
     return make_response(jsonify({"task": task}))
 
+@task_routes.route('/retrain', methods=['POST'])
+@auth_required
+def retrain_base_lm():
+
+    lang = 'si'
+    app_root = "/storage"
+    bs = 128
+    splitting_ratio = 0.1
+    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio)
+
+    web_socket = Server()
+    web_socket.publish_lm_progress(1)
+
+    adapt_text.build_base_lm()
+
+    web_socket = Server()
+    web_socket.publish_lm_progress(100)
+
+    return make_response('', 204)
 
 @task_routes.route('/task/user/<uid>')
 @auth_required

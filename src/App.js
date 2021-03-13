@@ -18,6 +18,7 @@ import "./App.css";
 import Task from "./pages/task";
 import Metrics from "./pages/metrics";
 import Prediction from "./pages/prediction";
+import Retrain from "./pages/retrain_base_model";
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
   const [logged] = useAuth();
@@ -57,6 +58,7 @@ export default function App() {
           <PrivateRoute path="/task/metrics/:id" component={Metrics} />
           <PrivateRoute path="/task/:id" component={Task} />
           <PrivateRoute path="/prediction/:id" component={Prediction} />
+          <PrivateRoute path="/retrain" component={Retrain} />
           <PrivateRoute path="/" component={Home} />
         </Switch>
       </div>

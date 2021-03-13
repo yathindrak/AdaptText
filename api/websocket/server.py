@@ -11,5 +11,8 @@ class Server:
             ssl=True
         )
 
-    def publish(self, task_id, percentage):
+    def publish_classifier_progress(self, task_id, percentage):
         self.instance.trigger('upload', 'progress-'+task_id, {'percentage': percentage})
+
+    def publish_lm_progress(self, percentage):
+        self.instance.trigger('upload', 'progress-lm', {'percentage': percentage})
