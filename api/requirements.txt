@@ -21,3 +21,4 @@ marshmallow==3.10.0
 marshmallow-sqlalchemy==0.24.2
 pusher
 psycopg2-binary==2.8.6
+scipy==1.6.1

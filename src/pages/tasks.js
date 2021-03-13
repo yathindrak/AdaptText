@@ -100,7 +100,7 @@ export default function Tasks() {
       cell: (row) => {
         let progress = row.progress || 0
         if(progress === 100){
-          return <Badge theme="secondary">Secondary</Badge>
+          return <Badge theme="success">Completed</Badge>
         } else {
           return <Badge theme="info">N/A</Badge>
         }
