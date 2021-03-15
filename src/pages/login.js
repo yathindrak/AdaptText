@@ -115,7 +115,6 @@ export default function Login() {
           >
             <CardHeader
               style={{
-                backgroundImage: "url(26366.svg)",
                 backgroundPosition: "center",
               }}
             >

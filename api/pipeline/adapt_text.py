@@ -78,32 +78,38 @@ class AdaptText:
 
     def prepare_base_lm_corpus(self):
         self.setup_wiki_data()
-        txt_filename = "test-s.txt"
-        filepath = Path(self.data_root + "/test-s.zip")
-        url = "https://www.dropbox.com/s/cnd985vl1bof50y/test-s.zip?dl=0"
-        # url = "https://www.dropbox.com/s/alh6jf4rqxhhzow/half-si-dedup.zip?dl=0"
+        # txt_filename = "test-s.txt"
+        # filepath = Path(self.data_root + "/test-s.zip")
+        # url = "https://www.dropbox.com/s/cnd985vl1bof50y/test-s.zip?dl=0"
+
+        txt_filename = "half-si-dedup.txt"
+        filepath = Path(self.data_root + "/half-si-dedup.zip")
+        url = "https://www.dropbox.com/s/alh6jf4rqxhhzow/half-si-dedup.zip?dl=0"
+
         self.add_external_text(txt_filename, filepath, url)
 
         dropbox_handler = DropboxHandler(self.data_root)
         dropbox_handler.download_articles()
 
-    def prepare_pretrained_lm(self, file_name):
+    def prepare_pretrained_lm(self, model_file_name):
         # models-test-s-10-epochs-with-cls.zip
         if (Path(f'{os.getcwd()}{self.data_root}').exists()):
             shutil.rmtree(f'{os.getcwd()}{self.data_root}')
         dropbox_handler = DropboxHandler(self.data_root)
-        dropbox_handler.download_pretrained_model(file_name)
+        dropbox_handler.download_pretrained_model(model_file_name)
 
         zip_handler = ZipHandler()
-        zip_handler.unzip(file_name)
+        zip_handler.unzip(model_file_name)
 
         if os.path.exists(self.mdl_path):
             shutil.rmtree(str(self.mdl_path))
             os.mkdir(str(self.mdl_path))
+            os.mkdir(str(self.base_lm_data_path))
         else:
             os.mkdir(str(self.data_path))
             os.mkdir(str(self.path))
             os.mkdir(str(self.mdl_path))
+            os.mkdir(str(self.base_lm_data_path))
 
         for source in self.lm_store_files:
             source = f'{os.getcwd()}{self.data_root}/data/{self.lang}wiki/models/{source}'
@@ -150,7 +156,8 @@ class AdaptText:
         if (not Path(self.mdl_path).exists()):
             print("Pretrained LM not found, preparing...")
             # below the classifier hardcode wont be there for library
-            self.prepare_pretrained_lm("one-outta-three.zip")
+            # self.prepare_pretrained_lm("one-outta-three.zip")
+            self.prepare_pretrained_lm("half_si_dedup.zip")
 
         df = df[[text_name, label_name]]
         func_names = [f'{func_name}.{extension}' for func_name, extension in zip(self.lm_fns, ['pth', 'pkl'])]
@@ -202,7 +209,7 @@ class AdaptText:
                                                                       self.splitting_ratio, vocab)
         data_class = classificationDataBunchLoader.load()
 
-        data_class.show_batch()
+        # data_class.show_batch()
 
         web_socket = Server()
         web_socket.publish_classifier_progress(task_id, 11)
@@ -212,7 +219,7 @@ class AdaptText:
                                                                          self.splitting_ratio, vocab, is_backward=True)
         data_class_bwd = classificationDataBunchLoaderBwd.load()
 
-        data_class_bwd.show_batch()
+        # data_class_bwd.show_batch()
 
         classes = data_class.classes
 
@@ -228,7 +235,8 @@ class AdaptText:
         web_socket.publish_classifier_progress(task_id, 38)
         self.update_progress(task_id, 38)
 
-        classifierTrainerFwd = ClassifierTrainer(data_class, self.lm_fns, self.mdl_path, custom_model_store_path, self.classifiers_store_path, task_id, False)
+        classifierTrainerFwd = ClassifierTrainer(data_class, self.lm_fns, self.mdl_path, custom_model_store_path,
+                                                 self.classifiers_store_path, task_id, False)
         classifierModelFWD = classifierTrainerFwd.train(grad_unfreeze)
 
         lmTrainerBwd = LMTrainer(data_lm_bwd, self.lm_fns_bwd, self.mdl_path, custom_model_store_path_bwd, True,
@@ -248,12 +256,12 @@ class AdaptText:
         web_socket.publish_classifier_progress(task_id, 80)
         self.update_progress(task_id, 80)
 
-        classifier_zip_file_name = "classifier_"+task_id+".zip"
+        classifier_zip_file_name = "classifier_" + task_id + ".zip"
         dropbox_classifier_zip_path = f'/adapttext/models/{classifier_zip_file_name}'
 
         zip_archive = zipfile.ZipFile(classifier_zip_file_name, 'w', zipfile.ZIP_DEFLATED)
         for item in self.classifiers_store_path:
-            pkl_name = item+task_id+".pkl"
+            pkl_name = item + task_id + ".pkl"
             zip_archive.write(pkl_name)
         zip_archive.close()
 
@@ -286,10 +294,10 @@ class AdaptText:
     #         zip_archive.write(pkl_name)
     #     zip_archive.close()
 
-        # response = make_response(zip_file_name.read())
-        # response.headers.set('Content-Type', 'zip')
-        # response.headers.set('Content-Disposition', 'attachment', filename='%s.zip' % os.path.basename(FILEPATH))
-        # return response
+    # response = make_response(zip_file_name.read())
+    # response.headers.set('Content-Type', 'zip')
+    # response.headers.set('Content-Disposition', 'attachment', filename='%s.zip' % os.path.basename(FILEPATH))
+    # return response
 
-        # dropbox_handler = DropboxHandler(self.data_root)
-        # dropbox_handler.upload_zip_file(zip_file_name, f'/adapttext/models/{zip_file_name}')
+    # dropbox_handler = DropboxHandler(self.data_root)
+    # dropbox_handler.upload_zip_file(zip_file_name, f'/adapttext/models/{zip_file_name}')

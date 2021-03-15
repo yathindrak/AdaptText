@@ -21,6 +21,8 @@ metrics.info('app_info', 'Application info', version='1.0.3')
 
 logging.basicConfig(filename='error.log',level=logging.DEBUG)
 
+# app.config['FLASK_APP'] = 'home/thilisadunik/adapttext/api/api.py'
+app.config['DATADOG_ENV'] = 'development'
 app.config['SECRET_KEY'] = environ.get('SECRET_KEY')
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('SQLITE_DB_URI')
 app.config['JWT_ACCESS_LIFESPAN'] = {'hours': 24}

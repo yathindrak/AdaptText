@@ -15,6 +15,7 @@ export default function Metrics() {
   const [task, setTask] = useState();
   const [accuracy, setAccuracy] = useState([]);
   const [confusionMatrix, setConfusionMatrix] = useState([]);
+  const [rocImage, setRocImage] = useState("");
   let data = [
     {
       id: "elixir",
@@ -295,33 +296,32 @@ export default function Metrics() {
             setTask(response?.task);
 
             let conf_matrix = response?.task["meta_data.conf_matrix"];
-            
-            console.log('---------------------')
-            // console.log(conf_matrix)
-            console.log(confusionMatrix1)
 
-            let classes = ["one", "two", "three"]
+            console.log("---------------------");
+            // console.log(conf_matrix)
+            console.log(confusionMatrix1);
+
+            let classes = ["one", "two", "three"];
 
             let zzz = conf_matrix.map((row, index) => {
-
-              let y = row.map((i,idx) => {
+              let y = row.map((i, idx) => {
                 // let keyname = classes[idx]
-                return {[classes[idx]]: i}
-              })
+                return { [classes[idx]]: i };
+              });
 
               // console.log(y)
 
               return {
                 actual: classes[index],
-                ...y
+                ...y,
                 // "hot dog": 11,
                 // "hot dogColor": "hsl(182, 70%, 50%)",
                 // burger: 69,
-              }
-            })
+              };
+            });
 
-            console.log(zzz)
-            setConfusionMatrix(zzz)
+            console.log(zzz);
+            setConfusionMatrix(zzz);
 
             // },
             // {
@@ -373,9 +373,10 @@ export default function Metrics() {
                 return response.blob();
               })
               .then((response) => {
+                setRocImage();
                 // console.log(JSON.parse(response))
-                let res_img = URL.createObjectURL(response);
-                console.log(res_img);
+                // let res_img = URL.createObjectURL(response);
+                // console.log(res_img);
               });
             //
           }
@@ -493,7 +494,7 @@ export default function Metrics() {
                   </h6>
                 </Col>
                 <Col style={{ height: "14rem" }}>
-                  <ResponsivePie
+                  {/* <ResponsivePie
                     data={data}
                     margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
                     startAngle={-90}
@@ -584,14 +585,17 @@ export default function Metrics() {
                       },
                     ]}
                     legends={[]}
+                  /> */}
+                  <img
+                    style={{ width: "20rem", height: "auto" }}
+                    src={`/api/plot_roc/${parseInt(task_id)}`}
                   />
                   <h6
                     style={{
                       textAlign: "center",
-                      transform: "translateY(-2rem)",
                     }}
                   >
-                    Error Rate
+                    ROC Curve
                   </h6>
                 </Col>
                 <Col style={{ height: "14rem" }}>
