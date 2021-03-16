@@ -122,7 +122,15 @@ def execute(id):
     pd.set_option('display.max_colwidth', -1)
     # path_to_csv="sinhala-hate-speech-dataset.csv"
     path_to_csv = meta_info.ds_path
-    df = pd.read_csv(path_to_csv)
+
+    df = None
+    df_comma_separated = pd.read_csv(path_to_csv, nrows=1, sep=",")
+    df_semi_colon_separated = pd.read_csv(path_to_csv, nrows=1, sep=";")
+
+    if df_comma_separated.shape[1] < df_semi_colon_separated.shape[1]:
+        df = pd.read_csv(path_to_csv, sep=";")
+    else:
+        df = pd.read_csv(path_to_csv)
 
     text_name = meta_info.ds_text_col
     label_name = meta_info.ds_label_col
@@ -139,7 +147,7 @@ def execute(id):
 
     print("Ensemble classifier analysis")
     accuracy, err, xlim, ylim, fpr, tpr, roc_auc, conf_matrix, macro_f1, macro_precision, macro_recall, macro_support, \
-    weighted_f1, weighted_precision, weighted_recall, weighted_support = evaluator.evaluate_ensemble(
+    weighted_f1, weighted_precision, weighted_recall, weighted_support, conf_matrix_fig_url, roc_curve_fig_url = evaluator.evaluate_ensemble(
         classifierModelFWD, classifierModelBWD)
 
     web_socket.publish_classifier_progress(id, 96)
@@ -172,7 +180,8 @@ def execute(id):
         setattr(meta_info, 'fpr', fpr.tolist())
         setattr(meta_info, 'tpr', tpr.tolist())
         setattr(meta_info, 'roc_auc', roc_auc.item())
-        setattr(meta_info, 'conf_matrix', conf_matrix.tolist())
+        setattr(meta_info, 'conf_matrix', conf_matrix_fig_url)
+        setattr(meta_info, 'roc_curve', roc_curve_fig_url)
         setattr(meta_info, 'macro_f1', macro_f1)
         setattr(meta_info, 'macro_precision', macro_precision)
         setattr(meta_info, 'macro_recall', macro_recall)

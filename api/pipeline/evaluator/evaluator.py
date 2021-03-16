@@ -1,8 +1,8 @@
+from ...utils.img_utils import ImageUtils
 from ..fastai1.text import TextClassificationInterpretation
 from ..fastai1.basics import *
 from sklearn.metrics import classification_report
 from sklearn.metrics import roc_curve, auc
-
 
 class Evaluator():
     def __init__(self):
@@ -37,20 +37,18 @@ class Evaluator():
         xlim = [-0.01, 1.0]
         ylim = [0.0, 1.01]
 
-        # Plot the ROC curve
-        plt.figure()
-        plt.plot(fpr, tpr, color='darkorange', label='Ensemble Classifier : ROC curve (area = %0.2f)' % roc_auc)
-        plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
-        plt.xlim(xlim)
-        plt.ylim(ylim)
-        plt.xlabel('False Positive(FP) Rate')
-        plt.ylabel('True Positive(TP) Rate')
-        plt.title('Receiver operating characteristic')
-        plt.legend(loc="lower right")
+        roc_curve_fig = self.draw_roc_curve(xlim, ylim, fpr, tpr, roc_auc)
 
         # use learn_clas_fwd for the ensemble to get close confusion matrix for the actual
         interpretation = ClassificationInterpretation(learn_clas_fwd, preds, y, losses)
         conf_matrix = interpretation.confusion_matrix()
+
+        interp = ClassificationInterpretation(learn_clas_fwd, preds, y, losses)
+        conf_matrix_fig = interp.plot_confusion_matrix(return_fig=True)
+
+        img_utils = ImageUtils()
+        conf_matrix_fig_url = img_utils.upload(conf_matrix_fig)
+        roc_curve_fig_url = img_utils.upload(roc_curve_fig)
 
         pred_val = learn_clas_fwd.get_preds(DatasetType.Valid, ordered=True)
         pred_val_l = pred_val[0].argmax(1)
@@ -67,7 +65,7 @@ class Evaluator():
         weighted_recall = class_report['weighted avg']['recall']
         weighted_support = class_report['weighted avg']['support']
 
-        return acc, err, xlim, ylim, fpr, tpr, roc_auc, conf_matrix, macro_f1, macro_precision, macro_recall, macro_support, weighted_f1, weighted_precision, weighted_recall, weighted_support
+        return acc, err, xlim, ylim, fpr, tpr, roc_auc, conf_matrix, macro_f1, macro_precision, macro_recall, macro_support, weighted_f1, weighted_precision, weighted_recall, weighted_support, conf_matrix_fig_url, roc_curve_fig_url
 
     def evaluate(self, learn):
         preds, y, losses = learn.get_preds(with_loss=True)
@@ -78,7 +76,7 @@ class Evaluator():
         err = error_rate(preds, y)
         print('The error rate is {0} %.'.format(err))
 
-        interp = ClassificationInterpretation(learn, preds, y, losses)
+        interp = ClassificationInterpretation(learn, preds, y, losses, return_fig=True)
         interp.plot_confusion_matrix()
 
         pred_val = learn.get_preds(DatasetType.Valid, ordered=True)

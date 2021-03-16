@@ -25,3 +25,4 @@ scipy==1.6.1
 prometheus-flask-exporter==0.18.1
 ddtrace==0.47.0
 sklearn
+filestack-python
