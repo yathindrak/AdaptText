@@ -34,7 +34,7 @@ apt install -y nginx
 apt install -y libmysqlclient-dev
 #
 apt update
-
+pip3 install ddtrace==0.47.0
 # git clone https://gitlab.com/yathindra/fastai1.git
 
 # setup libs for the app
