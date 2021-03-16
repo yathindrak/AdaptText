@@ -28,7 +28,7 @@ app.config['SECRET_KEY'] = environ.get('SECRET_KEY')
 app.config['JWT_ACCESS_LIFESPAN'] = {'hours': 24}
 app.config['JWT_REFRESH_LIFESPAN'] = {'days': 30}
 # app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.getcwd(), environ.get('SQLITE_DB_NAME'))}"
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://spubxaae:mDLa_tbGGv7jQAWQy8J5UCr5kh_L84_H@rosie.db.elephantsql.com:5432/spubxaae"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://spubxaae:mDLa_tbGGv7jQAWQy8J5UCr5kh_L84_H@rosie.db.elephantsql.com:5432/spubxaae"
 
 database.init_app(app)
 
