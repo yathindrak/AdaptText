@@ -1,7 +1,7 @@
 from ...utils.img_utils import ImageUtils
 from ..fastai1.text import TextClassificationInterpretation
 from ..fastai1.basics import *
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, matthews_corrcoef
 from sklearn.metrics import roc_curve, auc
 
 class Evaluator():
@@ -64,6 +64,9 @@ class Evaluator():
         weighted_precision = class_report['weighted avg']['precision']
         weighted_recall = class_report['weighted avg']['recall']
         weighted_support = class_report['weighted avg']['support']
+
+        print("--Mathews Correlation Coefficient--")
+        print(matthews_corrcoef(pred_val[1], pred_val_l))
 
         return acc, err, xlim, ylim, fpr, tpr, roc_auc, conf_matrix, macro_f1, macro_precision, macro_recall, macro_support, weighted_f1, weighted_precision, weighted_recall, weighted_support, conf_matrix_fig_url, roc_curve_fig_url
 
