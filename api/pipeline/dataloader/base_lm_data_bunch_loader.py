@@ -13,7 +13,7 @@ class BaseLMDataBunchLoader(BaseDataBunchLoader):
         self.lang = lang
 
     def load(self):
-        tokenizer = Tokenizer(SpacyTokenizer)
+        tokenizer = Tokenizer(SpacyTokenizer, lang="xx")
         data = (TextList.from_folder(Path(self.path), processor=[OpenFileProcessor(), TokenizeProcessor(tokenizer=tokenizer),NumericalizeProcessor(max_vocab=30000)])
                 .split_by_rand_pct(self.splitting_ratio, seed=self.seed)
                 .label_for_lm()
