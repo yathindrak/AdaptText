@@ -147,7 +147,7 @@ def execute(id):
     evaluator = Evaluator()
 
     print("Ensemble classifier analysis")
-    accuracy, err, xlim, ylim, fpr, tpr, roc_auc, conf_matrix, macro_f1, macro_precision, macro_recall, macro_support, \
+    accuracy, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, \
     weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url = evaluator.evaluate_ensemble(
         classifierModelFWD, classifierModelBWD)
 
@@ -156,7 +156,6 @@ def execute(id):
 
     # print('accuracy : ' + accuracy)
     # print('err : ' + err)
-    print(conf_matrix)
     # print('roc auc : ' + roc_auc)
     # print(conf_matrix)
 

@@ -44,13 +44,14 @@ class Evaluator():
         roc_curve_fig.savefig(roc_curve_fig_path)
 
         # use learn_clas_fwd for the ensemble to get close confusion matrix for the actual
-        interpretation = ClassificationInterpretation(learn_clas_fwd, preds, y, losses)
-        conf_matrix = interpretation.confusion_matrix()
-        conf_matrix_fig_path = 'conf_matrix_' + str(uuid.uuid4()) + '.png'
-        conf_matrix.savefig(conf_matrix_fig_path)
+        # interpretation = ClassificationInterpretation(learn_clas_fwd, preds, y, losses)
+        # conf_matrix = interpretation.confusion_matrix()
 
         interp = ClassificationInterpretation(learn_clas_fwd, preds, y, losses)
         conf_matrix_fig = interp.plot_confusion_matrix(return_fig=True)
+
+        conf_matrix_fig_path = 'conf_matrix_' + str(uuid.uuid4()) + '.png'
+        conf_matrix_fig.savefig(conf_matrix_fig_path)
 
         img_utils = ImageUtils()
         conf_matrix_fig_url = img_utils.upload(conf_matrix_fig_path)
@@ -75,7 +76,7 @@ class Evaluator():
         print("--Mathews Correlation Coefficient--")
         print(matthews_corrcoef(pred_val[1], pred_val_l))
 
-        return acc, err, xlim, ylim, fpr, tpr, roc_auc, conf_matrix, macro_f1, macro_precision, macro_recall, macro_support, weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url
+        return acc, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url
 
     def evaluate(self, learn):
         preds, y, losses = learn.get_preds(with_loss=True)
