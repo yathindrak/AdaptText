@@ -77,21 +77,21 @@ class LMTrainer(Trainer):
                 learn = self.retrieve_language_model(self.data, config=config, drop_multi_val=self.drop_mult,
                                                      metrics=[error_rate, accuracy, Perplexity()])
 
-        optar = partial(DiffGrad, betas=(.91, .999), eps=1e-7)
-        learn.opt_func = optar
-
-        # Find LR
-        tuner = HyperParameterTuner(learn)
-        lr = tuner.find_optimized_lr()
-
-        learn.fit_one_cycle(2, lr, moms=(0.8, 0.7),
-                            callbacks=[SaveModelCallback(learn), ReduceLROnPlateauCallback(learn, factor=0.8)])
-
-        learn.unfreeze()
-        learn.fit_one_cycle(8, lr, moms=(0.8, 0.7),
-                            callbacks=[SaveModelCallback(learn), ReduceLROnPlateauCallback(learn, factor=0.8)])
-
-        learn.predict("මේ අතර", n_words=30)
+        # optar = partial(DiffGrad, betas=(.91, .999), eps=1e-7)
+        # learn.opt_func = optar
+        #
+        # # Find LR
+        # tuner = HyperParameterTuner(learn)
+        # lr = tuner.find_optimized_lr()
+        #
+        # learn.fit_one_cycle(2, lr, moms=(0.8, 0.7),
+        #                     callbacks=[SaveModelCallback(learn), ReduceLROnPlateauCallback(learn, factor=0.8)])
+        #
+        # learn.unfreeze()
+        # learn.fit_one_cycle(8, lr, moms=(0.8, 0.7),
+        #                     callbacks=[SaveModelCallback(learn), ReduceLROnPlateauCallback(learn, factor=0.8)])
+        #
+        # learn.predict("මේ අතර", n_words=30)
 
         if self.is_backward:
             # comment below 2 lines of code out to avoid overriding base lm: cause errors otherwise
