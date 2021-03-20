@@ -100,9 +100,7 @@ export default function Home() {
       description &&
       filePath &&
       textColumnName &&
-      labelColumnName &&
-      continuousTrain &&
-      isImbalanced
+      labelColumnName
     ) {
       let req_body = {
         name: title,
