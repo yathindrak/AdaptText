@@ -1,3 +1,5 @@
+import uuid
+
 from ...utils.img_utils import ImageUtils
 from ..fastai1.text import TextClassificationInterpretation
 from ..fastai1.basics import *
@@ -38,22 +40,27 @@ class Evaluator():
         ylim = [0.0, 1.01]
 
         roc_curve_fig = self.draw_roc_curve(xlim, ylim, fpr, tpr, roc_auc)
+        roc_curve_fig_path = 'roc_curve_'+str(uuid.uuid4())+'.png'
+        roc_curve_fig.savefig(roc_curve_fig_path)
 
         # use learn_clas_fwd for the ensemble to get close confusion matrix for the actual
         interpretation = ClassificationInterpretation(learn_clas_fwd, preds, y, losses)
         conf_matrix = interpretation.confusion_matrix()
+        conf_matrix_fig_path = 'conf_matrix_' + str(uuid.uuid4()) + '.png'
+        conf_matrix.savefig(conf_matrix_fig_path)
 
         interp = ClassificationInterpretation(learn_clas_fwd, preds, y, losses)
         conf_matrix_fig = interp.plot_confusion_matrix(return_fig=True)
 
         img_utils = ImageUtils()
-        conf_matrix_fig_url = img_utils.upload(conf_matrix_fig)
-        roc_curve_fig_url = img_utils.upload(roc_curve_fig)
+        conf_matrix_fig_url = img_utils.upload(conf_matrix_fig_path)
+        roc_curve_fig_url = img_utils.upload(roc_curve_fig_path)
 
         pred_val = learn_clas_fwd.get_preds(DatasetType.Valid, ordered=True)
         pred_val_l = pred_val[0].argmax(1)
 
         class_report = classification_report(pred_val[1], pred_val_l, output_dict=True)
+        matthews_corr_coef = matthews_corrcoef(pred_val[1], pred_val_l)
 
         macro_f1 = class_report['macro avg']['f1-score']
         macro_precision = class_report['macro avg']['precision']
@@ -68,7 +75,7 @@ class Evaluator():
         print("--Mathews Correlation Coefficient--")
         print(matthews_corrcoef(pred_val[1], pred_val_l))
 
-        return acc, err, xlim, ylim, fpr, tpr, roc_auc, conf_matrix, macro_f1, macro_precision, macro_recall, macro_support, weighted_f1, weighted_precision, weighted_recall, weighted_support, conf_matrix_fig_url, roc_curve_fig_url
+        return acc, err, xlim, ylim, fpr, tpr, roc_auc, conf_matrix, macro_f1, macro_precision, macro_recall, macro_support, weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url
 
     def evaluate(self, learn):
         preds, y, losses = learn.get_preds(with_loss=True)
@@ -129,5 +136,13 @@ class Evaluator():
         plt.legend(loc="lower right")
 
         return fig
+
+    def get_accuracy(self, learn):
+        preds, y, losses = learn.get_preds(with_loss=True)
+
+        acc = accuracy(preds, y)
+        print('The accuracy is {0} %.'.format(acc))
+
+        return acc
 
 

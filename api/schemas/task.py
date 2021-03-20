@@ -12,7 +12,7 @@ class TaskSchema(ModelSchema):
                   'meta_data.err', 'meta_data.roc_curve', 'meta_data.conf_matrix', 'meta_data.macro_f1',
                   'meta_data.macro_precision', 'meta_data.macro_recall', 'meta_data.macro_support',
                   'meta_data.weighted_f1', 'meta_data.weighted_precision',
-                  'meta_data.weighted_recall', 'meta_data.weighted_support')
+                  'meta_data.weighted_recall', 'meta_data.weighted_support', 'meta_data.matthews_corr_coef')
 
         model = Task
         sqla_session = database.session

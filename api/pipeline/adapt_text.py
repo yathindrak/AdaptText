@@ -19,7 +19,7 @@ from .utils.wiki_handler import WikiHandler
 
 
 class AdaptText:
-    def __init__(self, lang, data_root, bs=128, splitting_ratio=0.1, continuous_train=True):
+    def __init__(self, lang, data_root, bs=128, splitting_ratio=0.1, continuous_train=True, is_imbalanced=False):
         self.lang = lang
         self.data_root = data_root
         self.bs = bs
@@ -39,6 +39,7 @@ class AdaptText:
         self.lm_store_files = ['si_wt_vocab.pkl', 'si_wt.pth', 'si_wt_vocab_bwd.pkl', 'si_wt_bwd.pth']
         self.classifiers_store_path = ["models/fwd-export", "models/bwd-export"]
         self.continuous_train = continuous_train
+        self.is_imbalanced = is_imbalanced
 
         if not torch.cuda.is_available():
             self.is_gpu = False
@@ -236,7 +237,7 @@ class AdaptText:
         self.update_progress(task_id, 38)
 
         classifierTrainerFwd = ClassifierTrainer(data_class, self.lm_fns, self.mdl_path, custom_model_store_path,
-                                                 self.classifiers_store_path, task_id, False)
+                                                 self.classifiers_store_path, task_id, False, is_imbalanced=self.is_imbalanced)
         classifierModelFWD = classifierTrainerFwd.train(grad_unfreeze)
 
         lmTrainerBwd = LMTrainer(data_lm_bwd, self.lm_fns_bwd, self.mdl_path, custom_model_store_path_bwd, True,
@@ -249,7 +250,7 @@ class AdaptText:
 
         classifierTrainerBwd = ClassifierTrainer(data_class_bwd, self.lm_fns_bwd, self.mdl_path,
                                                  custom_model_store_path_bwd, self.classifiers_store_path, task_id,
-                                                 True)
+                                                 True, is_imbalanced=self.is_imbalanced)
         classifierModelBWD = classifierTrainerBwd.train(grad_unfreeze)
 
         web_socket = Server()

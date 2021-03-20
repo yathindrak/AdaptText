@@ -1,4 +1,3 @@
-from io import BytesIO
 from filestack import Client
 
 
@@ -6,6 +5,10 @@ class ImageUtils:
     def __init__(self):
         self.client = Client("A2BIWbSEXSUKDLgjKn6fgz")
 
-    def upload(self, bin_content):
-        img_url = self.client.upload(file_obj=BytesIO(bin_content))
-        return img_url
+    def upload(self, img_path):
+        store_params = {
+            "mimetype": "image/png"
+        }
+        img_url = self.client.upload(filepath=img_path, store_params=store_params)
+
+        return img_url.url

@@ -41,6 +41,7 @@ def initiate():
         ds_text_col = json_obj['ds_text_col']
         ds_label_col = json_obj['ds_label_col']
         continuous_train = json_obj['continuous_train']
+        is_imbalanced = json_obj['is_imbalanced']
         accuracy = None
         # task_id = id
     except:
@@ -59,7 +60,7 @@ def initiate():
         return make_err_response('Bad Request', 'Duplicated name entered', 400)
 
     meta_data = MetaInfo(ds_path=ds_path, ds_text_col=ds_text_col, ds_label_col=ds_label_col,
-                         continuous_train=continuous_train, accuracy=accuracy, task_id=get_task.id)
+                         continuous_train=continuous_train, is_imbalanced=is_imbalanced, accuracy=accuracy, task_id=get_task.id)
 
     try:
         database.session.add(meta_data)
@@ -117,7 +118,7 @@ def execute(id):
     app_root = "/storage"
     bs = 128
     splitting_ratio = 0.1
-    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.continuous_train)
+    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.continuous_train, is_imbalanced=meta_info.is_imbalanced)
 
     pd.set_option('display.max_colwidth', -1)
     # path_to_csv="sinhala-hate-speech-dataset.csv"
@@ -147,7 +148,7 @@ def execute(id):
 
     print("Ensemble classifier analysis")
     accuracy, err, xlim, ylim, fpr, tpr, roc_auc, conf_matrix, macro_f1, macro_precision, macro_recall, macro_support, \
-    weighted_f1, weighted_precision, weighted_recall, weighted_support, conf_matrix_fig_url, roc_curve_fig_url = evaluator.evaluate_ensemble(
+    weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url = evaluator.evaluate_ensemble(
         classifierModelFWD, classifierModelBWD)
 
     web_socket.publish_classifier_progress(id, 96)
@@ -190,6 +191,7 @@ def execute(id):
         setattr(meta_info, 'weighted_precision', weighted_precision)
         setattr(meta_info, 'weighted_recall', weighted_recall)
         setattr(meta_info, 'weighted_support', weighted_support)
+        setattr(meta_info, 'matthews_corr_coef', matthews_corr_coef)
 
         meta_info = database.session.merge(meta_info)
         database.session.commit()
