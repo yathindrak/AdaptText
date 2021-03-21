@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 import pandas as pd
 import csv
 
-from ..api import logger
+from utils.logger import Logger
 from ..websocket.server import Server
 from ..pipeline.adapt_text import AdaptText
 from ..pipeline.evaluator.evaluator import Evaluator
@@ -17,12 +17,7 @@ from ..schemas.task import TaskSchema
 from ..models.user import User
 from ..models.task import Task
 from ..utils.http_utils import make_err_response
-from ..connection.initializers import guard, database
-
-from io import BytesIO
-from flask import Flask, send_file
-import numpy as np
-import matplotlib.pyplot as plt
+from ..connection.initializers import database
 
 task_routes = Blueprint('task', __name__)
 
@@ -30,10 +25,8 @@ task_routes = Blueprint('task', __name__)
 @task_routes.route('/task/initiate', methods=['POST'])
 @auth_required
 def initiate():
-    logger.info('Initiating task...',
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger = Logger()
+    logger.info('Initiating task...')
     json_obj = request.get_json()
     if not json_obj:
         return make_err_response('Bad Request', 'No valid entries provided', 400)
@@ -50,10 +43,7 @@ def initiate():
         accuracy = None
         # task_id = id
     except:
-        logger.info('No valid entries provided',
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('No valid entries provided')
         return make_err_response('Bad Request', 'No valid entries provided', 400)
 
     model_path = None
@@ -69,7 +59,8 @@ def initiate():
         return make_err_response('Bad Request', 'Duplicated name entered', 400)
 
     meta_data = MetaInfo(ds_path=ds_path, ds_text_col=ds_text_col, ds_label_col=ds_label_col,
-                         continuous_train=continuous_train, is_imbalanced=is_imbalanced, accuracy=accuracy, task_id=get_task.id)
+                         continuous_train=continuous_train, is_imbalanced=is_imbalanced, accuracy=accuracy,
+                         task_id=get_task.id)
 
     try:
         database.session.add(meta_data)
@@ -80,10 +71,7 @@ def initiate():
     meta_info_schema = MetaInfoSchema()
     meta_data = meta_info_schema.dump(meta_data)
 
-    logger.info('Completed initiating the task'+str(get_task.id),
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger.info('Completed initiating the task' + str(get_task.id))
 
     return make_response(jsonify({"meta_data": meta_data}), 201)
 
@@ -91,10 +79,8 @@ def initiate():
 @task_routes.route('/task/upload', methods=['POST'])
 @auth_required
 def upload_csv():
-    logger.info('Uploading csv file...',
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger = Logger()
+    logger.info('Uploading csv file...')
     uploaded_file = request.files['filepond']
 
     if uploaded_file.filename != '':
@@ -111,10 +97,7 @@ def upload_csv():
                 csv_column_names.append(row)
                 break
 
-        logger.info('Completed uploading csv file...',
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('Completed uploading csv file...')
 
         return make_response(jsonify({"file_path": file_path, "column_names": csv_column_names[0]}), 201)
 
@@ -123,10 +106,8 @@ def upload_csv():
 
 
 def update_progress(task_id, progress):
-    logger.info('Progress updated for the task '+str(task_id)+' with progress of '+ str(progress),
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger = Logger()
+    logger.info('Progress updated for the task ' + str(task_id) + ' with progress of ' + str(progress))
     database.session.query(Task).filter_by(id=task_id).update({"progress": progress})
     database.session.commit()
 
@@ -141,16 +122,15 @@ def execute(id):
     model_path = None
     current_user = User.lookup(flask_praetorian.current_user().username)
 
-    logger.info('Start execution of the task ' + str(id),
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger = Logger()
+    logger.info('Start execution of the task ' + str(id))
 
     lang = 'si'
     app_root = "/storage"
     bs = 128
     splitting_ratio = 0.1
-    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.continuous_train, is_imbalanced=meta_info.is_imbalanced)
+    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.continuous_train,
+                           is_imbalanced=meta_info.is_imbalanced)
 
     pd.set_option('display.max_colwidth', -1)
     # path_to_csv="sinhala-hate-speech-dataset.csv"
@@ -172,19 +152,13 @@ def execute(id):
     web_socket.publish_classifier_progress(id, 1)
     update_progress(id, 1)
 
-    logger.info('Start building classification model',
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger.info('Start building classification model')
     classifierModelFWD, classifierModelBWD, classes = adapt_text.build_classifier(df, text_name, label_name, id,
                                                                                   grad_unfreeze=False)
 
     evaluator = Evaluator()
 
-    logger.info('Ensemble classifier analysis',
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger.info('Ensemble classifier analysis')
     accuracy, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, \
     weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url = evaluator.evaluate_ensemble(
         classifierModelFWD, classifierModelBWD)
@@ -192,10 +166,7 @@ def execute(id):
     web_socket.publish_classifier_progress(id, 96)
     update_progress(id, 96)
 
-    logger.info('Start updating metrics under Metainfo',
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger.info('Start updating metrics under Metainfo')
 
     try:
         meta_info = MetaInfo.query.filter_by(task_id=id).first()
@@ -227,20 +198,15 @@ def execute(id):
     finally:
         database.session.close()
 
-    logger.info('Commiting updating metrics under Metainfo',
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger.info('Commiting updating metrics under Metainfo')
 
     web_socket.publish_classifier_progress(id, 100)
     update_progress(id, 100)
 
-    logger.info('Done updating metrics under Metainfo',
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger.info('Done updating metrics under Metainfo')
 
     return make_response('', 204)
+
 
 @task_routes.route('/task/<id>')
 @auth_required
@@ -256,13 +222,12 @@ def get_by_id(id):
     task = task_schema.dump(get_task)
     return make_response(jsonify({"task": task}))
 
+
 @task_routes.route('/retrain', methods=['POST'])
 @auth_required
 def retrain_base_lm():
-    logger.info('Retraining the Pretrained Model',
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger = Logger()
+    logger.info('Retraining the Pretrained Model')
 
     lang = 'si'
     app_root = "/storage"
@@ -279,6 +244,7 @@ def retrain_base_lm():
     web_socket.publish_lm_progress(100)
 
     return make_response('', 204)
+
 
 @task_routes.route('/task/user/<uid>')
 @auth_required

@@ -2,10 +2,9 @@ import os
 from os import environ
 from flask import Flask
 import flask_cors
-import logging
-import json_log_formatter
 from prometheus_flask_exporter import PrometheusMetrics
 
+from .utils.logger import Logger
 from .routes.prediction import prediction_routes
 from .commands import init_database, add_user
 from .connection.initializers import database, guard
@@ -20,12 +19,12 @@ app = Flask(__name__)
 metrics = PrometheusMetrics(app)
 metrics.info('app_info', 'Application info', version='1.0.3')
 
-formatter = json_log_formatter.JSONFormatter()
-json_handler = logging.FileHandler(filename='/var/log/adapttext.json')
-json_handler.setFormatter(formatter)
-logger = logging.getLogger('adapttext')
-logger.addHandler(json_handler)
-logger.setLevel(logging.INFO)
+# formatter = json_log_formatter.JSONFormatter()
+# json_handler = logging.FileHandler(filename='/var/log/adapttext.json')
+# json_handler.setFormatter(formatter)
+# logger = logging.getLogger('adapttext')
+# logger.addHandler(json_handler)
+# logger.setLevel(logging.INFO)
 
 # logging.basicConfig(filename='error.log',level=logging.DEBUG)
 
@@ -56,11 +55,8 @@ app.register_blueprint(prediction_routes, url_prefix='/api')
 
 # Plug metrics WSGI app to your main app with dispatcher
 # dispatcher = DispatcherMiddleware(app.wsgi_app, {"/metrics": make_wsgi_app()})
-
+logger = Logger()
 if __name__ == '__main__':
     app.run(debug=True)
-    logger.info('Server started...',
-                extra={
-                    'logger.name': 'adapttext',
-                })
+    logger.info('Server started...')
     # run_simple(hostname="0.0.0.0", port=5000, application=dispatcher)

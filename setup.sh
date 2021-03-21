@@ -40,6 +40,7 @@ install --upgrade pip
 apt-get install git
 apt install -y nginx
 apt install -y libmysqlclient-dev
+DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=5557f6a687102089b482b46479d702d9 DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
 #
 apt update
 

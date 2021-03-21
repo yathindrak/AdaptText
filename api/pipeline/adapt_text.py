@@ -2,7 +2,7 @@ import zipfile
 
 from sklearn.model_selection import train_test_split
 
-from api import logger
+from ..utils.logger import Logger
 from ..connection.initializers import database
 from ..models.task import Task
 from ..websocket.server import Server
@@ -50,6 +50,7 @@ class AdaptText:
             self.is_gpu = True
 
     def setup_wiki_data(self):
+        logger = Logger()
         # making required directories
         self.path.mkdir(exist_ok=True, parents=True)
         self.mdl_path.mkdir(exist_ok=True)
@@ -58,17 +59,11 @@ class AdaptText:
 
         # Getting wiki articles
         wikihandler.retrieve_articles(self.path)
-        logger.info('Retrieved wiki articles',
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('Retrieved wiki articles')
 
         # Prepare articles
         base_lm_data_path = wikihandler.prepare_articles(self.path)
-        logger.info('Completed preparing wiki articles',
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('Completed preparing wiki articles')
         return base_lm_data_path
 
     def add_external_text(self, txt_filename, filepath, url):
@@ -161,11 +156,9 @@ class AdaptText:
         database.session.commit()
 
     def build_classifier(self, df, text_name, label_name, task_id, grad_unfreeze: bool = True, preprocessor=None):
+        logger = Logger()
         if (not Path(self.mdl_path).exists()):
-            logger.info('Pretrained LM not found, preparing...',
-                        extra={
-                            'logger.name': 'adapttext',
-                        })
+            logger.info('Pretrained LM not found, preparing...')
 
             # below the classifier hardcode wont be there for library
             # self.prepare_pretrained_lm("one-outta-three.zip")
@@ -186,10 +179,7 @@ class AdaptText:
         else:
             preprocessor.preprocess_text()
 
-        logger.info('Done preprocessing...',
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('Done preprocessing...')
 
         # item_counts = df[label_name].value_counts()
 
@@ -244,10 +234,7 @@ class AdaptText:
         web_socket.publish_classifier_progress(task_id, 13)
         self.update_progress(task_id, 13)
 
-        logger.info('Loaded data for training...',
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('Loaded data for training...')
 
         lmTrainerFwd = LMTrainer(data_lm, self.lm_fns, self.mdl_path, custom_model_store_path, False,
                                  is_gpu=self.is_gpu)
@@ -293,10 +280,7 @@ class AdaptText:
         database.session.query(Task).filter_by(id=task_id).update({"model_path": dropbox_classifier_zip_path})
         database.session.commit()
 
-        logger.info('Completed Training...',
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('Completed Training...')
 
         web_socket.publish_classifier_progress(task_id, 80)
         self.update_progress(task_id, 80)
