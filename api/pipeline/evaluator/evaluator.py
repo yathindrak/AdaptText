@@ -1,6 +1,6 @@
 import uuid
 
-from api import logger
+from ...utils.logger import Logger
 from ...utils.img_utils import ImageUtils
 from ..fastai1.text import TextClassificationInterpretation
 from ..fastai1.basics import *
@@ -12,6 +12,7 @@ class Evaluator():
         pass
 
     def evaluate_ensemble(self, learn_clas_fwd, learn_clas_bwd):
+        logger = Logger()
         preds_fw, y_fw, losses_fw = learn_clas_fwd.get_preds(with_loss=True)
         preds_bw, y_bw, losses_bw = learn_clas_bwd.get_preds(with_loss=True)
 
@@ -23,16 +24,10 @@ class Evaluator():
         losses = (losses_fw + losses_bw) / 2
 
         acc = accuracy(preds, y)
-        logger.info('The accuracy is {0} %.'.format(acc),
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('The accuracy is {0} %.'.format(acc))
 
         err = error_rate(preds, y)
-        logger.info('The error rate is {0} %.'.format(err),
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('The error rate is {0} %.'.format(err))
 
         # probs from log preds
         probs = np.exp(preds[:, 1])
@@ -41,10 +36,7 @@ class Evaluator():
 
         # Compute ROC area
         roc_auc = auc(fpr, tpr)
-        logger.info('ROC area is {0}'.format(roc_auc),
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('ROC area is {0}'.format(roc_auc))
 
         xlim = [-0.01, 1.0]
         ylim = [0.0, 1.01]
@@ -83,10 +75,7 @@ class Evaluator():
         weighted_recall = class_report['weighted avg']['recall']
         weighted_support = class_report['weighted avg']['support']
 
-        logger.info('Evaluation completed',
-                    extra={
-                        'logger.name': 'adapttext',
-                    })
+        logger.info('Evaluation completed')
 
         return acc, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url
 
@@ -151,10 +140,11 @@ class Evaluator():
         return fig
 
     def get_accuracy(self, learn):
+        logger = Logger()
         preds, y, losses = learn.get_preds(with_loss=True)
 
         acc = accuracy(preds, y)
-        print('The accuracy is {0} %.'.format(acc))
+        logger.info('The accuracy is {0} %.'.format(acc))
 
         return acc
 
