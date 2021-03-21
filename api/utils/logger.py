@@ -5,6 +5,9 @@ import json_log_formatter
 class Logger:
     def __init__(self):
         formatter = json_log_formatter.JSONFormatter()
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s [%(levelname)s] - %(message)s')
         json_handler = logging.FileHandler(filename='/var/log/adapttext.json')
         json_handler.setFormatter(formatter)
         self.logger = logging.getLogger('adapttext')
