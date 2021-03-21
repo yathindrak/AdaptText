@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 import pandas as pd
 import csv
 
-from utils.logger import Logger
+from ..utils.logger import Logger
 from ..websocket.server import Server
 from ..pipeline.adapt_text import AdaptText
 from ..pipeline.evaluator.evaluator import Evaluator
