@@ -19,10 +19,11 @@ apt update
 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 source ~/.nvm/nvm.sh
+nvm install 10
 
 
-apt install -y nodejs
-apt install -y npm
+# apt install -y nodejs
+# apt install -y npm
 npm i -g yarn
 yarn
 yarn build
