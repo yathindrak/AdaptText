@@ -57,6 +57,6 @@ app.register_blueprint(prediction_routes, url_prefix='/api')
 # dispatcher = DispatcherMiddleware(app.wsgi_app, {"/metrics": make_wsgi_app()})
 logger = Logger()
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8080)
     logger.info('Server started...')
-    # run_simple(hostname="0.0.0.0", port=5000, application=dispatcher)
+    # run_simple(hostname="0.0.0.0", port=8080, application=dispatcher)
