@@ -1,4 +1,5 @@
 matplotlib==3.3.4
+numpy
 pandas
 torchvision
 sentencepiece==0.1.95

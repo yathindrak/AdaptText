@@ -1,6 +1,6 @@
 server {
     listen 80;
-    root /root/adapttext/build;
+    root /var/adapttext/build;
     index index.html;
 
     location / {
