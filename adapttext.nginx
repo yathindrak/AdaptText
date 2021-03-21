@@ -1,6 +1,6 @@
 server {
     listen 80;
-    root /home/thilisadunik/adapttext/build;
+    root /root/adapttext/build;
     index index.html;
 
     location / {

@@ -41,6 +41,11 @@ apt install -y nginx
 apt install -y libmysqlclient-dev
 #
 apt update
+
+pip3 install wheel
+python3 setup.py bdist_wheel
+pip3 install --upgrade setuptools
+pip3 install --upgrade cython
 pip3 install ddtrace==0.47.0
 # git clone https://gitlab.com/yathindra/fastai1.git
 

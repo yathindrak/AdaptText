@@ -4,9 +4,9 @@ After=network.target
 
 [Service]
 User=thilisadunik
-WorkingDirectory=/home/thilisadunik/adapttext/api
-EnvironmentFile=/home/thilisadunik/adapttext/api/.env
-ExecStart=ddtrace-run /home/thilisadunik/adapttext/api/env/bin/flask run --host=0.0.0.0
+WorkingDirectory=/root/adapttext/api
+EnvironmentFile=/root/adapttext/api/.env
+ExecStart=ddtrace-run /root/adapttext/api/env/bin/flask run --host=0.0.0.0
 Restart=always
 
 [Install]
