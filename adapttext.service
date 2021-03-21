@@ -6,7 +6,7 @@ After=network.target
 User=root
 WorkingDirectory=/var/adapttext/api
 EnvironmentFile=/var/adapttext/api/.env
-ExecStart=ddtrace-run /var/adapttext/api/env/bin/flask run --host=0.0.0.0
+ExecStart=/usr/local/bin/ddtrace-run /var/adapttext/api/env/bin/flask run --host=0.0.0.0
 Restart=always
 
 [Install]
