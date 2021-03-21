@@ -27,7 +27,7 @@ nvm install 10
 npm i -g yarn
 yarn
 yarn build
-cp build /var/
+# cp build /var/
 apt install -y software-properties-common
 add-apt-repository ppa:deadsnakes/ppa -y
 apt update
@@ -69,6 +69,7 @@ pip3 install --upgrade cython
 pip3 install blinker==1.4 wrapt==1.12.1 smart-open==3.0.0 inflection==0.3.1 wikiextractor==0.01 flask-mail==0.9.1
 pip3 install numpy python-dotenv
 
+python3 -m pip install --upgrade pip
 pip3 install -r requirements.txt
 
 pip3 install flask-mail==0.9.1
