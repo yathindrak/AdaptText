@@ -16,6 +16,11 @@ chmod 777 /classification
 # setup instance
 #commented out below scripts temp
 apt update
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+source ~/.nvm/nvm.sh
+
+
 apt install -y nodejs
 apt install -y npm
 npm i -g yarn
@@ -26,6 +31,7 @@ add-apt-repository ppa:deadsnakes/ppa -y
 apt update
 apt install -y python3
 apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
+sudo apt-get install gcc libpq-dev -y
 apt install -y python3-pip
 apt-get install -y python3-venv
 install --upgrade pip
@@ -46,7 +52,12 @@ cd api
 python3 -m venv env
 source env/bin/activate
 
+pip install wheel
+python setup.py bdist_wheel
+
 pip install --upgrade setuptools
+
+pip3 install --upgrade cython
 
 pip3 install blinker==1.4 wrapt==1.12.1 smart-open==3.0.0 inflection==0.3.1 wikiextractor==0.01 flask-mail==0.9.1
 
