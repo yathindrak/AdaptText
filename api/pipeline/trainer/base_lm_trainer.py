@@ -33,7 +33,7 @@ class BaseLMTrainer(Trainer):
         learn = LanguageLearner(databunch, model, split_function, metrics=metrics)
 
         if pretrained_file_paths is not None:
-            print(pretrained_file_paths)
+            # print(pretrained_file_paths)
             data_path = learn.path
             model_path = learn.model_dir
 

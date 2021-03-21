@@ -99,6 +99,11 @@ git clone https://gitlab.com/yathindra/fastai1.git
 cd ..
 cd ..
 
+mkdir /etc/datadog-agent/conf.d/python.d
+cp ./conf.yaml /etc/datadog-agent/conf.d/python.d/conf.yaml
+chown -R dd-agent:dd-agent /etc/datadog-agent/conf.d/python.d/
+systemctl restart datadog-agent
+
 cp ./adapttext.service /etc/systemd/system/adapttext.service
 systemctl daemon-reload
 systemctl enable adapttext.service

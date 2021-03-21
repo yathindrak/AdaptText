@@ -2,6 +2,7 @@ import zipfile
 
 from sklearn.model_selection import train_test_split
 
+from api import logger
 from ..connection.initializers import database
 from ..models.task import Task
 from ..websocket.server import Server
@@ -57,11 +58,17 @@ class AdaptText:
 
         # Getting wiki articles
         wikihandler.retrieve_articles(self.path)
-        print("Retrieved wiki articles")
+        logger.info('Retrieved wiki articles',
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
 
         # Prepare articles
         base_lm_data_path = wikihandler.prepare_articles(self.path)
-        print("Completed preparing wiki articles")
+        logger.info('Completed preparing wiki articles',
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
         return base_lm_data_path
 
     def add_external_text(self, txt_filename, filepath, url):
@@ -155,7 +162,11 @@ class AdaptText:
 
     def build_classifier(self, df, text_name, label_name, task_id, grad_unfreeze: bool = True, preprocessor=None):
         if (not Path(self.mdl_path).exists()):
-            print("Pretrained LM not found, preparing...")
+            logger.info('Pretrained LM not found, preparing...',
+                        extra={
+                            'logger.name': 'adapttext',
+                        })
+
             # below the classifier hardcode wont be there for library
             # self.prepare_pretrained_lm("one-outta-three.zip")
             self.prepare_pretrained_lm("half_si_dedup.zip")
@@ -175,8 +186,13 @@ class AdaptText:
         else:
             preprocessor.preprocess_text()
 
-        item_counts = df[label_name].value_counts()
-        print(item_counts)
+        logger.info('Done preprocessing...',
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
+
+        # item_counts = df[label_name].value_counts()
+
         df[label_name].value_counts().plot.bar(rot=30)
 
         df_trn, df_val = train_test_split(df, stratify=df[label_name], test_size=0.1)
@@ -228,6 +244,11 @@ class AdaptText:
         web_socket.publish_classifier_progress(task_id, 13)
         self.update_progress(task_id, 13)
 
+        logger.info('Loaded data for training...',
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
+
         lmTrainerFwd = LMTrainer(data_lm, self.lm_fns, self.mdl_path, custom_model_store_path, False,
                                  is_gpu=self.is_gpu)
         languageModelFWD = lmTrainerFwd.train()
@@ -271,6 +292,11 @@ class AdaptText:
 
         database.session.query(Task).filter_by(id=task_id).update({"model_path": dropbox_classifier_zip_path})
         database.session.commit()
+
+        logger.info('Completed Training...',
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
 
         web_socket.publish_classifier_progress(task_id, 80)
         self.update_progress(task_id, 80)

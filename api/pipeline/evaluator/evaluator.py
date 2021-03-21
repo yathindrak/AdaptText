@@ -1,5 +1,6 @@
 import uuid
 
+from api import logger
 from ...utils.img_utils import ImageUtils
 from ..fastai1.text import TextClassificationInterpretation
 from ..fastai1.basics import *
@@ -22,10 +23,16 @@ class Evaluator():
         losses = (losses_fw + losses_bw) / 2
 
         acc = accuracy(preds, y)
-        print('The accuracy is {0} %.'.format(acc))
+        logger.info('The accuracy is {0} %.'.format(acc),
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
 
         err = error_rate(preds, y)
-        print('The error rate is {0} %.'.format(err))
+        logger.info('The error rate is {0} %.'.format(err),
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
 
         # probs from log preds
         probs = np.exp(preds[:, 1])
@@ -34,7 +41,10 @@ class Evaluator():
 
         # Compute ROC area
         roc_auc = auc(fpr, tpr)
-        print('ROC area is {0}'.format(roc_auc))
+        logger.info('ROC area is {0}'.format(roc_auc),
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
 
         xlim = [-0.01, 1.0]
         ylim = [0.0, 1.01]
@@ -72,6 +82,11 @@ class Evaluator():
         weighted_precision = class_report['weighted avg']['precision']
         weighted_recall = class_report['weighted avg']['recall']
         weighted_support = class_report['weighted avg']['support']
+
+        logger.info('Evaluation completed',
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
 
         return acc, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url
 

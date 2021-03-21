@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 import pandas as pd
 import csv
 
+from ..api import logger
 from ..websocket.server import Server
 from ..pipeline.adapt_text import AdaptText
 from ..pipeline.evaluator.evaluator import Evaluator
@@ -29,6 +30,10 @@ task_routes = Blueprint('task', __name__)
 @task_routes.route('/task/initiate', methods=['POST'])
 @auth_required
 def initiate():
+    logger.info('Initiating task...',
+                extra={
+                    'logger.name': 'adapttext',
+                })
     json_obj = request.get_json()
     if not json_obj:
         return make_err_response('Bad Request', 'No valid entries provided', 400)
@@ -45,6 +50,10 @@ def initiate():
         accuracy = None
         # task_id = id
     except:
+        logger.info('No valid entries provided',
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
         return make_err_response('Bad Request', 'No valid entries provided', 400)
 
     model_path = None
@@ -71,12 +80,21 @@ def initiate():
     meta_info_schema = MetaInfoSchema()
     meta_data = meta_info_schema.dump(meta_data)
 
+    logger.info('Completed initiating the task'+str(get_task.id),
+                extra={
+                    'logger.name': 'adapttext',
+                })
+
     return make_response(jsonify({"meta_data": meta_data}), 201)
 
 
 @task_routes.route('/task/upload', methods=['POST'])
 @auth_required
 def upload_csv():
+    logger.info('Uploading csv file...',
+                extra={
+                    'logger.name': 'adapttext',
+                })
     uploaded_file = request.files['filepond']
 
     if uploaded_file.filename != '':
@@ -93,6 +111,11 @@ def upload_csv():
                 csv_column_names.append(row)
                 break
 
+        logger.info('Completed uploading csv file...',
+                    extra={
+                        'logger.name': 'adapttext',
+                    })
+
         return make_response(jsonify({"file_path": file_path, "column_names": csv_column_names[0]}), 201)
 
     else:
@@ -100,6 +123,10 @@ def upload_csv():
 
 
 def update_progress(task_id, progress):
+    logger.info('Progress updated for the task '+str(task_id)+' with progress of '+ str(progress),
+                extra={
+                    'logger.name': 'adapttext',
+                })
     database.session.query(Task).filter_by(id=task_id).update({"progress": progress})
     database.session.commit()
 
@@ -113,6 +140,11 @@ def execute(id):
     meta_info = MetaInfo.query.filter_by(task_id=id).first()
     model_path = None
     current_user = User.lookup(flask_praetorian.current_user().username)
+
+    logger.info('Start execution of the task ' + str(id),
+                extra={
+                    'logger.name': 'adapttext',
+                })
 
     lang = 'si'
     app_root = "/storage"
@@ -140,13 +172,19 @@ def execute(id):
     web_socket.publish_classifier_progress(id, 1)
     update_progress(id, 1)
 
-    print("Start building classification model")
+    logger.info('Start building classification model',
+                extra={
+                    'logger.name': 'adapttext',
+                })
     classifierModelFWD, classifierModelBWD, classes = adapt_text.build_classifier(df, text_name, label_name, id,
                                                                                   grad_unfreeze=False)
 
     evaluator = Evaluator()
 
-    print("Ensemble classifier analysis")
+    logger.info('Ensemble classifier analysis',
+                extra={
+                    'logger.name': 'adapttext',
+                })
     accuracy, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, \
     weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url = evaluator.evaluate_ensemble(
         classifierModelFWD, classifierModelBWD)
@@ -154,21 +192,11 @@ def execute(id):
     web_socket.publish_classifier_progress(id, 96)
     update_progress(id, 96)
 
-    # print('accuracy : ' + accuracy)
-    # print('err : ' + err)
-    # print('roc auc : ' + roc_auc)
-    # print(conf_matrix)
+    logger.info('Start updating metrics under Metainfo',
+                extra={
+                    'logger.name': 'adapttext',
+                })
 
-    # print("start updating metrics under metainfo")
-    # database.session.query(MetaInfo).filter_by(task_id=id).update(
-    #     {"accuracy": accuracy, "err": err, "xlim": xlim, "ylim": ylim, "fpr": fpr, "tpr": tpr, "roc_auc": roc_auc,
-    #      "conf_matrix": conf_matrix, "macro_f1": macro_f1, "macro_precision": macro_precision, "macro_recall": macro_recall,
-    #      "macro_support": macro_support, "weighted_f1": weighted_f1, "weighted_precision": weighted_precision,
-    #      "weighted_recall": weighted_recall, "weighted_support": weighted_support})
-
-    print(classes)
-    print(type(classes))
-    print("start updating metrics under metainfo")
     try:
         meta_info = MetaInfo.query.filter_by(task_id=id).first()
         # setattr(meta_info, 'ds_path', 'aassdaasd')
@@ -198,58 +226,21 @@ def execute(id):
         print(e)
     finally:
         database.session.close()
-    # database.session.query(MetaInfo).filter_by(task_id=id).update(
-    # { >
-    # database.session.query(MetaInfo).filter_by(task_id=id).update({"accuracy": accuracy, "err": err})
-    print("commiting updating metrics under metainfo")
 
-    # database.session.commit()
+    logger.info('Commiting updating metrics under Metainfo',
+                extra={
+                    'logger.name': 'adapttext',
+                })
 
     web_socket.publish_classifier_progress(id, 100)
     update_progress(id, 100)
 
-    print("done updating metrics under metainfo")
+    logger.info('Done updating metrics under Metainfo',
+                extra={
+                    'logger.name': 'adapttext',
+                })
 
-    # return make_response(jsonify({"accuracy": accuracy, "err": err}), 201)
     return make_response('', 204)
-
-    # clear below part of this func
-
-    # //////////////////////////////////////////////////////////
-
-    # json_obj = request.get_json()
-    # if not json_obj:
-    #     return make_err_response('Bad Request', 'No valid entries provided', 400)
-    # try:
-    #     db_text_col = json_obj['db_text_col']
-    #     db_label_col = json_obj['db_label_col']
-    #     accuracy = json_obj["accuracy"]
-    #     task_id = id
-    # except:
-    #     return make_err_response('Bad Request', 'No valid entries provided', 400)
-    #
-    # get_meta_data = MetaData(db_text_col=db_text_col, db_label_col=db_label_col, accuracy=accuracy, task_id=task_id)
-    #
-    # try:
-    #     database.session.add(get_meta_data)
-    #     database.session.commit()
-    # except IntegrityError:
-    #     return make_err_response('Bad Request', 'Duplicated name entered', 400)
-    #
-    # meta_data_schema = MetaDataSchema()
-    # meta_data = meta_data_schema.dump(get_meta_data)
-    #
-    # return make_response(jsonify({"meta_data": meta_data}), 201)
-
-
-# percentage = 0
-# task_id = 0
-# pusher_client.trigger('upload', 'progress',
-#                       {
-#                           'percentage': percentage,
-#                           'task_id': task_id
-#                       })
-
 
 @task_routes.route('/task/<id>')
 @auth_required
@@ -268,6 +259,10 @@ def get_by_id(id):
 @task_routes.route('/retrain', methods=['POST'])
 @auth_required
 def retrain_base_lm():
+    logger.info('Retraining the Pretrained Model',
+                extra={
+                    'logger.name': 'adapttext',
+                })
 
     lang = 'si'
     app_root = "/storage"
@@ -329,69 +324,14 @@ def update_by_id(id):
     task = task_schema.dump(get_task)
     return make_response(jsonify({"task": task}))
 
-
-# @task_routes.route('/protectedd')
-# def protected():
-#     try:
-#         print('take 00')
-#         # obj = database.session.query(MetaInfo).filter_by(task_id=1)
-#         meta_info = MetaInfo.query.filter_by(task_id=1).first()
-#         print('met')
-#         print(meta_info)
-#         setattr(meta_info, 'ds_path', 'aassdaasd')
-#         setattr(meta_info, 'accuracy', 1)
+# @task_routes.route('/plot_roc/<id>')
+# def plot_roc(id):
+#     meta_info = MetaInfo.query.filter_by(task_id=id).first()
 #
-#         meta_info = database.session.merge(meta_info)
-#         # print(meta_info.accuracy)
-#         database.session.commit()
-#     except Exception as e:
-#         print(e)
-#     finally:
-#         database.session.close()
-#     return jsonify({'result': 'You are in a special area!'}), 200
+#     evaluator = Evaluator()
+#     roc_figure = evaluator.draw_roc_curve(meta_info.xlim, meta_info.ylim, meta_info.fpr, meta_info.tpr, meta_info.roc_auc)
+#     bytes = BytesIO()
+#     plt.savefig(bytes, dpi=roc_figure.dpi)
+#     bytes.seek(0)
 #
-#
-# @task_routes.route('/refresh', methods=['POST'])
-# def refresh():
-#     json_data = request.get_json()
-#
-#     if not json_data:
-#         return make_err_response('Bad Request', 'Token not found', 400)
-#
-#     prev_token = json_data['token']
-#     if not prev_token:
-#         return make_err_response('Bad Request', 'Token not found', 400)
-#
-#     token = guard.refresh_jwt_token(prev_token)
-#     return jsonify({'access_token': token})
-
-@task_routes.route('/plot_roc/<id>')
-def plot_roc(id):
-    meta_info = MetaInfo.query.filter_by(task_id=id).first()
-
-    evaluator = Evaluator()
-    roc_figure = evaluator.draw_roc_curve(meta_info.xlim, meta_info.ylim, meta_info.fpr, meta_info.tpr, meta_info.roc_auc)
-    bytes = BytesIO()
-    plt.savefig(bytes, dpi=roc_figure.dpi)
-    bytes.seek(0)
-
-    return send_file(bytes, mimetype='image/png')
-
-# @task_routes.route('/download')
-# def download_classifier():
-#     lang = 'si'
-#     app_root = "/storage"
-#     bs = 128
-#     splitting_ratio = 0.1
-#     adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=False)
-#
-#     zip_file_name = "classifier.zip"
-#     adapt_text.download_classifier(zip_file_name)
-#
-#     with open(zip_file_name, 'rb') as f:
-#         data = f.readlines()
-#     os.remove(zip_file_name)
-#     return Response(data, headers={
-#         'Content-Type': 'application/zip',
-#         'Content-Disposition': 'attachment; filename=%s;' % zip_file_name
-#     })
+#     return send_file(bytes, mimetype='image/png')

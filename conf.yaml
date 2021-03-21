@@ -1,0 +1,8 @@
+init_config:
+instances:
+logs:
+  - type: file
+    path: /var/log/adapttext.json
+    service: flask
+    source: python
+    sourcecategory: sourcecode
