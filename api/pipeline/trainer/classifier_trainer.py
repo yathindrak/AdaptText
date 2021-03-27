@@ -118,7 +118,10 @@ class ClassifierTrainer(Trainer):
         learn.unfreeze()
 
         tuner = HyperParameterTuner(learn)
-        lr = tuner.find_optimized_lr()
+        lr_unfrozed = tuner.find_optimized_lr()
+
+        if lr_unfrozed:
+            lr = lr_unfrozed
 
         if self.is_imbalanced:
             learn.fit_one_cycle(6, lr, callbacks=[SaveModelCallback(learn), OverSamplingCallback(learn),

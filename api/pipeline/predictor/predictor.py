@@ -1,20 +1,20 @@
+import pandas as pd
+import numpy as np
+
 class Predictor:
-    def __init__(self, learn_clas_fwd, learn_clas_bwd, classes):
+    def __init__(self, learn_clas_fwd, learn_clas_bwd, learn, classes):
         self.learn_classifier_fwd = learn_clas_fwd
         self.learn_classifier_bwd = learn_clas_bwd
+        self.learn = learn
         self.classes = classes
 
     def predict(self, input_text):
-        f_prediction = self.learn_classifier_fwd.predict(input_text)[2]
-        b_prediction = self.learn_classifier_bwd.predict(input_text)[2]
-        average_prediction = f_prediction + b_prediction
+        f_prediction = self.learn_classifier_fwd.predict(input_text)[2].numpy()
+        b_prediction = self.learn_classifier_bwd.predict(input_text)[2].numpy()
 
-        max_value = average_prediction[0]
-        max_index = 0
+        pred_fwd = pd.DataFrame([f_prediction], columns=list(self.classes)).add_prefix('fwd_')
+        pred_bwd = pd.DataFrame([b_prediction], columns=list(self.classes)).add_prefix('bwd_')
 
-        for i, x in enumerate(average_prediction):
-            if x > max_value:
-                max_value = x
-                max_index = i
+        pred = (pred_fwd.join(pred_bwd))
 
-        return self.classes[max_index], average_prediction
+        return str(self.learn.predict(np.squeeze(pred))[0])

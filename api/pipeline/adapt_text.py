@@ -2,6 +2,7 @@ import zipfile
 
 from sklearn.model_selection import train_test_split
 
+from .trainer.ensemble_trainer import EnsembleTrainer
 from ..utils.logger import Logger
 from ..connection.initializers import database
 from ..models.task import Task
@@ -38,7 +39,7 @@ class AdaptText:
                               f'{data_root}/data/{lang}wiki/models/si_wt_vocab_bwd.pkl',
                               f'{data_root}/data/{lang}wiki/models/si_wt_bwd.pth']
         self.lm_store_files = ['si_wt_vocab.pkl', 'si_wt.pth', 'si_wt_vocab_bwd.pkl', 'si_wt_bwd.pth']
-        self.classifiers_store_path = ["models/fwd-export", "models/bwd-export"]
+        self.classifiers_store_path = ["models/fwd-export", "models/bwd-export", "models/ensemble-export"]
         self.continuous_train = continuous_train
         self.is_imbalanced = is_imbalanced
 
@@ -262,8 +263,15 @@ class AdaptText:
         classifierModelBWD = classifierTrainerBwd.train(grad_unfreeze)
 
         web_socket = Server()
-        web_socket.publish_classifier_progress(task_id, 80)
-        self.update_progress(task_id, 80)
+        web_socket.publish_classifier_progress(task_id, 70)
+        self.update_progress(task_id, 70)
+
+        ensembleTrainer = EnsembleTrainer(classifierModelFWD, classifierModelBWD, self.classifiers_store_path, task_id)
+        ensembleModel = ensembleTrainer.train()
+
+        web_socket = Server()
+        web_socket.publish_classifier_progress(task_id, 75)
+        self.update_progress(task_id, 75)
 
         classifier_zip_file_name = "classifier_" + task_id + ".zip"
         dropbox_classifier_zip_path = f'/adapttext/models/{classifier_zip_file_name}'
@@ -285,7 +293,7 @@ class AdaptText:
         web_socket.publish_classifier_progress(task_id, 80)
         self.update_progress(task_id, 80)
 
-        return classifierModelFWD, classifierModelBWD, classes
+        return classifierModelFWD, classifierModelBWD, ensembleModel, classes
 
     def store_lm(self, zip_file_name):
         # zip_file_name = "test.zip"

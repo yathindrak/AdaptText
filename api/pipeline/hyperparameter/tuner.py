@@ -8,5 +8,8 @@ class HyperParameterTuner:
     def find_optimized_lr(self):
         self.learn.lr_find()
         self.learn.recorder.plot(suggestion=True)
-        lr = self.learn.recorder.min_grad_lr
+        try:
+            lr = self.learn.recorder.min_grad_lr
+        except:
+            lr = None
         return lr

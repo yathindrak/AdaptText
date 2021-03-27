@@ -60,13 +60,14 @@ def predict(task_id, text):
     meta_info = MetaInfo.query.filter_by(task_id=task_id).first()
 
     classifier_dir = "/classification/models/"
-    classifiers_store_path = ["fwd-export", "bwd-export"]
+    classifiers_store_path = ["fwd-export", "bwd-export", "ensemble-export"]
 
     learn_classifier_fwd = load_learner(classifier_dir, classifiers_store_path[0] + str(get_task.id) + ".pkl")
     learn_classifier_bwd = load_learner(classifier_dir, classifiers_store_path[1] + str(get_task.id) + ".pkl")
+    learn_classifier_ensemble = load_learner(classifier_dir, classifiers_store_path[2] + str(get_task.id) + ".pkl")
 
-    predictor = Predictor(learn_classifier_fwd, learn_classifier_bwd, meta_info.classes)
+    predictor = Predictor(learn_classifier_fwd, learn_classifier_bwd, learn_classifier_ensemble, meta_info.classes)
 
     prediction = predictor.predict(text)
 
-    return jsonify({'predicted_label': prediction[0]}), 200
+    return jsonify({'predicted_label': prediction}), 200

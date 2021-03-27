@@ -153,7 +153,7 @@ def execute(id):
     update_progress(id, 1)
 
     logger.info('Start building classification model')
-    classifierModelFWD, classifierModelBWD, classes = adapt_text.build_classifier(df, text_name, label_name, id,
+    classifierModelFWD, classifierModelBWD, learn_ensemble, classes = adapt_text.build_classifier(df, text_name, label_name, id,
                                                                                   grad_unfreeze=False)
 
     evaluator = Evaluator()
@@ -161,7 +161,7 @@ def execute(id):
     logger.info('Ensemble classifier analysis')
     accuracy, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, \
     weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url = evaluator.evaluate_ensemble(
-        classifierModelFWD, classifierModelBWD)
+        learn_ensemble)
 
     web_socket.publish_classifier_progress(id, 96)
     update_progress(id, 96)

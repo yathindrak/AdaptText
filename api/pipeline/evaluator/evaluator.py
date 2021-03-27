@@ -11,17 +11,9 @@ class Evaluator():
     def __init__(self):
         pass
 
-    def evaluate_ensemble(self, learn_clas_fwd, learn_clas_bwd):
+    def evaluate_ensemble(self, learn):
         logger = Logger()
-        preds_fw, y_fw, losses_fw = learn_clas_fwd.get_preds(with_loss=True)
-        preds_bw, y_bw, losses_bw = learn_clas_bwd.get_preds(with_loss=True)
-
-        # if abs(accuracy(preds_fw, y_fw) - accuracy(preds_bw, y_bw) > 10):
-        #   print("Higher difference between accuracies of fw and bwd models...")
-
-        preds = (preds_fw + preds_bw) / 2
-        y = (y_fw + y_bw) / 2
-        losses = (losses_fw + losses_bw) / 2
+        preds, y, losses = learn.get_preds(with_loss=True)
 
         acc = accuracy(preds, y)
         logger.info('The accuracy is {0} %.'.format(acc))
@@ -49,7 +41,7 @@ class Evaluator():
         # interpretation = ClassificationInterpretation(learn_clas_fwd, preds, y, losses)
         # conf_matrix = interpretation.confusion_matrix()
 
-        interp = ClassificationInterpretation(learn_clas_fwd, preds, y, losses)
+        interp = ClassificationInterpretation(learn, preds, y, losses)
         conf_matrix_fig = interp.plot_confusion_matrix(return_fig=True)
 
         conf_matrix_fig_path = 'conf_matrix_' + str(uuid.uuid4()) + '.png'
@@ -59,7 +51,7 @@ class Evaluator():
         conf_matrix_fig_url = img_utils.upload(conf_matrix_fig_path)
         roc_curve_fig_url = img_utils.upload(roc_curve_fig_path)
 
-        pred_val = learn_clas_fwd.get_preds(DatasetType.Valid, ordered=True)
+        pred_val = learn.get_preds(DatasetType.Valid, ordered=True)
         pred_val_l = pred_val[0].argmax(1)
 
         class_report = classification_report(pred_val[1], pred_val_l, output_dict=True)
