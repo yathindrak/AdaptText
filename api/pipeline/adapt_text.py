@@ -20,7 +20,7 @@ from .utils.wiki_handler import WikiHandler
 
 
 class AdaptText:
-    def __init__(self, lang, data_root, bs=128, splitting_ratio=0.1, continuous_train=True, is_imbalanced=False):
+    def __init__(self, lang, data_root, bs=60, splitting_ratio=0.1, continuous_train=True, is_imbalanced=False):
         self.__lang = lang
         self.__data_root = data_root
         self.__bs = bs
