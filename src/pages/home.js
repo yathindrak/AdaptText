@@ -111,7 +111,7 @@ export default function Home() {
         continuous_train: continuousTrain,
         is_imbalanced: isImbalanced,
       };
-      authFetch(`/api/task/initiate`, {
+      authFetch(`/api/task`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

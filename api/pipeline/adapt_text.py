@@ -6,14 +6,14 @@ from .trainer.ensemble_trainer import EnsembleTrainer
 from ..utils.logger import Logger
 from ..connection.initializers import database
 from ..models.task import Task
-from ..websocket.server import Server
+from ..websocket.pusher_publisher import PusherPublisher
 from .utils.dropbox_handler import DropboxHandler
 from .utils.zip_handler import ZipHandler
 from .fastai1.basics import *
 from .dataloader.base_lm_data_bunch_loader import BaseLMDataBunchLoader
 from .dataloader.classification_data_bunch_loader import ClassificationDataBunchLoader
 from .dataloader.lm_data_bunch_loader import LMDataBunchLoader
-from .preprocessor.preprocessor import TextPreProcessor
+from .preprocessor.preprocessor import PreProcessor
 from .trainer.base_lm_trainer import BaseLMTrainer
 from .trainer.classifier_trainer import ClassifierTrainer
 from .trainer.lm_trainer import LMTrainer
@@ -102,8 +102,9 @@ class AdaptText:
         dropbox_handler = DropboxHandler(self.data_root)
         dropbox_handler.download_pretrained_model(model_file_name)
 
-        zip_handler = ZipHandler()
-        zip_handler.unzip(model_file_name)
+        current_working_dir = os.getcwd()
+        with zipfile.ZipFile(model_file_name, 'r') as archive:
+            archive.extractall(current_working_dir)
 
         if os.path.exists(self.mdl_path):
             shutil.rmtree(str(self.mdl_path))
@@ -124,7 +125,7 @@ class AdaptText:
         #     print("Base LM corpus not found, preparing the corpus...")
         self.prepare_base_lm_corpus()
 
-        web_socket = Server()
+        web_socket = PusherPublisher()
         web_socket.publish_lm_progress(20)
 
         baseLMDataBunchLoader = BaseLMDataBunchLoader(self.base_lm_data_path, self.splitting_ratio)
@@ -156,7 +157,7 @@ class AdaptText:
         database.session.query(Task).filter_by(id=task_id).update({"progress": progress})
         database.session.commit()
 
-    def build_classifier(self, df, text_name, label_name, task_id, grad_unfreeze: bool = True, preprocessor=None):
+    def build_classifier(self, df, text_name, label_name, task_id, grad_unfreeze: bool = True):
         logger = Logger()
         if (not Path(self.mdl_path).exists()):
             logger.info('Pretrained LM not found, preparing...')
@@ -171,14 +172,11 @@ class AdaptText:
         if not Path(func_names[0]).exists():
             return
 
-        custom_model_store_path = self.mdl_path / Path(f'{self.lang}_lm_wt_vocab.pkl')
-        custom_model_store_path_bwd = self.mdl_path / Path(f'{self.lang}_lm_wt_vocab_bwd.pkl')
+        # custom_model_store_path = self.mdl_path / Path(f'{self.lang}_lm_wt_vocab.pkl')
+        # custom_model_store_path_bwd = self.mdl_path / Path(f'{self.lang}_lm_wt_vocab_bwd.pkl')
 
-        if preprocessor is None:
-            preprocessor = TextPreProcessor(df, text_name)
-            preprocessor.preprocess_text()
-        else:
-            preprocessor.preprocess_text()
+        preprocessor = PreProcessor(df, text_name)
+        preprocessor.preprocess_text()
 
         logger.info('Done preprocessing...')
 
@@ -186,90 +184,88 @@ class AdaptText:
 
         df[label_name].value_counts().plot.bar(rot=30)
 
-        df_trn, df_val = train_test_split(df, stratify=df[label_name], test_size=0.1)
+        df_trn, df_val = train_test_split(df, stratify=df[label_name], test_size=0.1, random_state=42)
 
-        web_socket = Server()
+        web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 3)
         self.update_progress(task_id, 3)
 
         # forward training
-        lmDataBunchLoader = LMDataBunchLoader(df_trn, df_val, text_name, label_name, self.splitting_ratio,
+        lmDataBunchLoader = LMDataBunchLoader(df_trn, df_val, text_name, label_name,
                                               self.data_root, continuous_train=self.continuous_train)
 
         data_lm = lmDataBunchLoader.load()
 
-        web_socket = Server()
+        web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 7)
         self.update_progress(task_id, 7)
 
-        lmDataBunchLoaderBwd = LMDataBunchLoader(df_trn, df_val, text_name, label_name, self.splitting_ratio,
+        lmDataBunchLoaderBwd = LMDataBunchLoader(df_trn, df_val, text_name, label_name,
                                                  self.data_root, continuous_train=self.continuous_train,
                                                  is_backward=True)
         data_lm_bwd = lmDataBunchLoaderBwd.load()
 
-        web_socket = Server()
+        web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 9)
         self.update_progress(task_id, 9)
 
-        vocab = data_lm.train_ds.vocab
+        vocab = data_lm.train_ds.__vocab
 
-        classificationDataBunchLoader = ClassificationDataBunchLoader(df_trn, df_val, text_name, label_name,
-                                                                      self.splitting_ratio, vocab)
+        classificationDataBunchLoader = ClassificationDataBunchLoader(df_trn, df_val, text_name, label_name, vocab)
         data_class = classificationDataBunchLoader.load()
 
         # data_class.show_batch()
 
-        web_socket = Server()
+        web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 11)
         self.update_progress(task_id, 11)
 
         classificationDataBunchLoaderBwd = ClassificationDataBunchLoader(df_trn, df_val, text_name, label_name,
-                                                                         self.splitting_ratio, vocab, is_backward=True)
+                                                                         vocab, is_backward=True)
         data_class_bwd = classificationDataBunchLoaderBwd.load()
 
         # data_class_bwd.show_batch()
 
         classes = data_class.classes
 
-        web_socket = Server()
+        web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 13)
         self.update_progress(task_id, 13)
 
         logger.info('Loaded data for training...')
 
-        lmTrainerFwd = LMTrainer(data_lm, self.lm_fns, self.mdl_path, custom_model_store_path, False,
+        lmTrainerFwd = LMTrainer(data_lm, self.lm_fns, self.mdl_path, False,
                                  is_gpu=self.is_gpu)
         languageModelFWD = lmTrainerFwd.train()
 
-        web_socket = Server()
+        web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 38)
         self.update_progress(task_id, 38)
 
-        classifierTrainerFwd = ClassifierTrainer(data_class, self.lm_fns, self.mdl_path, custom_model_store_path,
-                                                 self.classifiers_store_path, task_id, False, is_imbalanced=self.is_imbalanced)
+        classifierTrainerFwd = ClassifierTrainer(data_class, self.classifiers_store_path, task_id, False,
+                                                 is_imbalanced=self.is_imbalanced)
         classifierModelFWD = classifierTrainerFwd.train(grad_unfreeze)
 
-        lmTrainerBwd = LMTrainer(data_lm_bwd, self.lm_fns_bwd, self.mdl_path, custom_model_store_path_bwd, True,
+        lmTrainerBwd = LMTrainer(data_lm_bwd, self.lm_fns_bwd, self.mdl_path, True,
                                  is_gpu=self.is_gpu)
         languageModelBWD = lmTrainerBwd.train()
 
-        web_socket = Server()
+        web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 63)
         self.update_progress(task_id, 63)
 
-        classifierTrainerBwd = ClassifierTrainer(data_class_bwd, self.lm_fns_bwd, self.mdl_path,
-                                                 custom_model_store_path_bwd, self.classifiers_store_path, task_id,
+        classifierTrainerBwd = ClassifierTrainer(data_class_bwd, self.classifiers_store_path, task_id,
                                                  True, is_imbalanced=self.is_imbalanced)
         classifierModelBWD = classifierTrainerBwd.train(grad_unfreeze)
 
-        web_socket = Server()
+        web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 70)
         self.update_progress(task_id, 70)
 
         ensembleTrainer = EnsembleTrainer(classifierModelFWD, classifierModelBWD, self.classifiers_store_path, task_id)
         ensembleModel = ensembleTrainer.train()
 
-        web_socket = Server()
+        web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 75)
         self.update_progress(task_id, 75)
 

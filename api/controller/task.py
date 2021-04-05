@@ -8,7 +8,7 @@ import pandas as pd
 import csv
 
 from ..utils.logger import Logger
-from ..websocket.server import Server
+from ..websocket.pusher_publisher import PusherPublisher
 from ..pipeline.adapt_text import AdaptText
 from ..pipeline.evaluator.evaluator import Evaluator
 from ..schemas.metainfo import MetaInfoSchema
@@ -19,12 +19,12 @@ from ..models.task import Task
 from ..utils.http_utils import make_err_response
 from ..connection.initializers import database
 
-task_routes = Blueprint('task', __name__)
+task_controller = Blueprint('task', __name__)
 
 
-@task_routes.route('/task/initiate', methods=['POST'])
+@task_controller.route('/task', methods=['POST'])
 @auth_required
-def initiate():
+def create():
     logger = Logger()
     logger.info('Initiating task...')
     json_obj = request.get_json()
@@ -76,7 +76,7 @@ def initiate():
     return make_response(jsonify({"meta_data": meta_data}), 201)
 
 
-@task_routes.route('/task/upload', methods=['POST'])
+@task_controller.route('/task/upload', methods=['POST'])
 @auth_required
 def upload_csv():
     logger = Logger()
@@ -112,7 +112,7 @@ def update_progress(task_id, progress):
     database.session.commit()
 
 
-@task_routes.route('/task/execute/<id>', methods=['POST'])
+@task_controller.route('/task/execute/<id>', methods=['POST'])
 @auth_required
 def execute(id):
     if not id:
@@ -120,7 +120,7 @@ def execute(id):
 
     meta_info = MetaInfo.query.filter_by(task_id=id).first()
     model_path = None
-    current_user = User.lookup(flask_praetorian.current_user().username)
+    # current_user = User.lookup(flask_praetorian.current_user().username)
 
     logger = Logger()
     logger.info('Start execution of the task ' + str(id))
@@ -129,8 +129,8 @@ def execute(id):
     app_root = "/storage"
     bs = 128
     splitting_ratio = 0.1
-    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.continuous_train,
-                           is_imbalanced=meta_info.is_imbalanced)
+    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.__continuous_train,
+                           is_imbalanced=meta_info.__is_imbalanced)
 
     pd.set_option('display.max_colwidth', -1)
     # path_to_csv="sinhala-hate-speech-dataset.csv"
@@ -148,7 +148,7 @@ def execute(id):
     text_name = meta_info.ds_text_col
     label_name = meta_info.ds_label_col
 
-    web_socket = Server()
+    web_socket = PusherPublisher()
     web_socket.publish_classifier_progress(id, 1)
     update_progress(id, 1)
 
@@ -159,9 +159,10 @@ def execute(id):
     evaluator = Evaluator()
 
     logger.info('Ensemble classifier analysis')
-    accuracy, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, \
-    weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url = evaluator.evaluate_ensemble(
-        learn_ensemble)
+    # accuracy, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, \
+    # weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url\
+    #
+    metrics_dict = evaluator.evaluate_ensemble(learn_ensemble)
 
     web_socket.publish_classifier_progress(id, 96)
     update_progress(id, 96)
@@ -171,25 +172,25 @@ def execute(id):
     try:
         meta_info = MetaInfo.query.filter_by(task_id=id).first()
         # setattr(meta_info, 'ds_path', 'aassdaasd')
-        setattr(meta_info, 'accuracy', accuracy.item())
-        setattr(meta_info, 'err', err.item())
+        setattr(meta_info, 'accuracy', metrics_dict['acc'])
+        setattr(meta_info, 'err', metrics_dict['err'])
         setattr(meta_info, 'classes', classes)
-        setattr(meta_info, 'xlim', xlim)
-        setattr(meta_info, 'ylim', ylim)
-        setattr(meta_info, 'fpr', fpr.tolist())
-        setattr(meta_info, 'tpr', tpr.tolist())
-        setattr(meta_info, 'roc_auc', roc_auc.item())
-        setattr(meta_info, 'conf_matrix', conf_matrix_fig_url)
-        setattr(meta_info, 'roc_curve', roc_curve_fig_url)
-        setattr(meta_info, 'macro_f1', macro_f1)
-        setattr(meta_info, 'macro_precision', macro_precision)
-        setattr(meta_info, 'macro_recall', macro_recall)
-        setattr(meta_info, 'macro_support', macro_support)
-        setattr(meta_info, 'weighted_f1', weighted_f1)
-        setattr(meta_info, 'weighted_precision', weighted_precision)
-        setattr(meta_info, 'weighted_recall', weighted_recall)
-        setattr(meta_info, 'weighted_support', weighted_support)
-        setattr(meta_info, 'matthews_corr_coef', matthews_corr_coef)
+        setattr(meta_info, 'xlim', metrics_dict['xlim'])
+        setattr(meta_info, 'ylim', metrics_dict['ylim'])
+        setattr(meta_info, 'fpr', metrics_dict['fpr'])
+        setattr(meta_info, 'tpr', metrics_dict['tpr'])
+        setattr(meta_info, 'roc_auc', metrics_dict['roc_auc'])
+        setattr(meta_info, 'conf_matrix', metrics_dict['conf_matrix_fig_url'])
+        setattr(meta_info, 'roc_curve', metrics_dict['roc_curve_fig_url'])
+        setattr(meta_info, 'macro_f1', metrics_dict['macro_f1'])
+        setattr(meta_info, 'macro_precision', metrics_dict['macro_precision'])
+        setattr(meta_info, 'macro_recall', metrics_dict['macro_recall'])
+        setattr(meta_info, 'macro_support', metrics_dict['macro_support'])
+        setattr(meta_info, 'weighted_f1', metrics_dict['weighted_f1'])
+        setattr(meta_info, 'weighted_precision', metrics_dict['weighted_precision'])
+        setattr(meta_info, 'weighted_recall', metrics_dict['weighted_recall'])
+        setattr(meta_info, 'weighted_support', metrics_dict['weighted_support'])
+        setattr(meta_info, 'matthews_corr_coef', metrics_dict['matthews_corr_coef'])
 
         meta_info = database.session.merge(meta_info)
         database.session.commit()
@@ -208,7 +209,7 @@ def execute(id):
     return make_response('', 204)
 
 
-@task_routes.route('/task/<id>')
+@task_controller.route('/task/<id>')
 @auth_required
 def get_by_id(id):
     get_task = Task.query.get(id)
@@ -223,7 +224,7 @@ def get_by_id(id):
     return make_response(jsonify({"task": task}))
 
 
-@task_routes.route('/retrain', methods=['POST'])
+@task_controller.route('/retrain', methods=['POST'])
 @auth_required
 def retrain_base_lm():
     logger = Logger()
@@ -235,27 +236,27 @@ def retrain_base_lm():
     splitting_ratio = 0.1
     adapt_text = AdaptText(lang, app_root, bs, splitting_ratio)
 
-    web_socket = Server()
+    web_socket = PusherPublisher()
     web_socket.publish_lm_progress(1)
 
     adapt_text.build_base_lm()
 
-    web_socket = Server()
+    web_socket = PusherPublisher()
     web_socket.publish_lm_progress(100)
 
     return make_response('', 204)
 
 
-@task_routes.route('/task/user/<uid>')
-@auth_required
-def get_by_username(uid):
-    get_tasks = Task.query.filter_by(user_id=uid).all()
-    task_schema = TaskSchema(many=True)
-    tasks = task_schema.dump(get_tasks)
-    return make_response(jsonify({"task": tasks}), 200)
+# @task_controller.route('/task/user/<uid>')
+# @auth_required
+# def get_by_username(uid):
+#     get_tasks = Task.query.filter_by(user_id=uid).all()
+#     task_schema = TaskSchema(many=True)
+#     tasks = task_schema.dump(get_tasks)
+#     return make_response(jsonify({"task": tasks}), 200)
 
 
-@task_routes.route('/tasks')
+@task_controller.route('/tasks')
 @auth_required
 def get_all():
     current_user = flask_praetorian.current_user().id
@@ -268,27 +269,27 @@ def get_all():
     return make_response(jsonify({"tasks": tasks}), 200)
 
 
-@task_routes.route('/task/<id>', methods=['PUT'])
-@auth_required
-def update_by_id(id):
-    data = request.get_json()
-    get_task = Task.query.get(id)
-
-    progress = data.get('progress')
-    model_path = data.get('model_path')
-
-    if progress and model_path:
-        database.session.query(Task).filter_by(id=id).update({"progress": progress, "model_path": model_path})
-    elif progress:
-        database.session.query(Task).filter_by(id=id).update({"progress": progress})
-    elif model_path:
-        database.session.query(Task).filter_by(id=id).update({"model_path": model_path})
-
-    database.session.commit()
-
-    task_schema = TaskSchema()
-    task = task_schema.dump(get_task)
-    return make_response(jsonify({"task": task}))
+# @task_controller.route('/task/<id>', methods=['PUT'])
+# @auth_required
+# def update_by_id(id):
+#     data = request.get_json()
+#     get_task = Task.query.get(id)
+#
+#     progress = data.get('progress')
+#     model_path = data.get('model_path')
+#
+#     if progress and model_path:
+#         database.session.query(Task).filter_by(id=id).update({"progress": progress, "model_path": model_path})
+#     elif progress:
+#         database.session.query(Task).filter_by(id=id).update({"progress": progress})
+#     elif model_path:
+#         database.session.query(Task).filter_by(id=id).update({"model_path": model_path})
+#
+#     database.session.commit()
+#
+#     task_schema = TaskSchema()
+#     task = task_schema.dump(get_task)
+#     return make_response(jsonify({"task": task}))
 
 # @task_routes.route('/plot_roc/<id>')
 # def plot_roc(id):

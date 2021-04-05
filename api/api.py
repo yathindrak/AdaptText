@@ -5,12 +5,12 @@ import flask_cors
 from prometheus_flask_exporter import PrometheusMetrics
 
 from .utils.logger import Logger
-from .routes.prediction import prediction_routes
 from .commands import init_database, add_user
 from .connection.initializers import database, guard
 from .models.user import User
-from .routes.auth import auth_routes
-from .routes.task import task_routes
+from .controller.auth import auth_controller
+from .controller.task import task_controller
+from .controller.prediction import prediction_controller
 
 cors = flask_cors.CORS()
 
@@ -46,9 +46,9 @@ app.cli.add_command(init_database)
 app.cli.add_command(add_user)
 
 
-app.register_blueprint(auth_routes, url_prefix='/api')
-app.register_blueprint(task_routes, url_prefix='/api')
-app.register_blueprint(prediction_routes, url_prefix='/api')
+app.register_blueprint(auth_controller, url_prefix='/api')
+app.register_blueprint(task_controller, url_prefix='/api')
+app.register_blueprint(prediction_controller, url_prefix='/api')
 
 # provide app's version and deploy environment/config name to set a gauge metric
 # register_metrics(app, app_version="v0.1.2", app_config="development")

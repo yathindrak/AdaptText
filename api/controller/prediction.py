@@ -1,5 +1,6 @@
+import os
 from pathlib import Path
-
+import zipfile
 import flask_praetorian
 from flask import Blueprint, make_response, jsonify
 from flask_praetorian import auth_required
@@ -13,10 +14,10 @@ from ..models.user import User
 from ..models.task import Task
 from ..utils.http_utils import make_err_response
 
-prediction_routes = Blueprint('prediction', __name__)
+prediction_controller = Blueprint('prediction', __name__)
 
 
-@prediction_routes.route('/prediction/<id>')
+@prediction_controller.route('/prediction/<id>')
 @auth_required
 def load_classifier(id):
     get_task = Task.query.get(id)
@@ -38,16 +39,16 @@ def load_classifier(id):
 
     dropbox_handler = DropboxHandler(classifier_root)
     destination = classifier_root + model_file_name
-    dropbox_handler.download_clasifier_model(model_file_name, destination)
+    dropbox_handler.download_classifier_model(model_file_name, destination)
 
     # unzip
-    zipHandler = ZipHandler()
-    zipHandler.unzip(destination, destination=classifier_root)
+    with zipfile.ZipFile(destination, 'r') as archive:
+        archive.extractall(classifier_root)
 
     return make_response('model downloaded', 201)
 
 
-@prediction_routes.route('/predict/<task_id>/<text>')
+@prediction_controller.route('/predict/<task_id>/<text>')
 @auth_required
 def predict(task_id, text):
     get_task = Task.query.get(task_id)

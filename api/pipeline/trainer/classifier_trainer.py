@@ -8,20 +8,30 @@ from ..evaluator.evaluator import Evaluator
 import copy
 
 class ClassifierTrainer(Trainer):
-    def __init__(self, data, lm_fns, mdl_path, model_store_path, classifiers_store_path, task_id, is_backward=False, drop_mult=0.5, is_imbalanced=False, lang='si'):
-        self.data = data
-        self.lm_fns = lm_fns
-        self.mdl_path = mdl_path
-        self.model_store_path = model_store_path
-        self.classifiers_store_path = classifiers_store_path
-        self.task_id = task_id
-        self.is_backward = is_backward
-        self.drop_mult = drop_mult
-        self.is_imbalanced = is_imbalanced
-        self.lang = lang
+    def __init__(self, data, classifiers_store_path, task_id, is_backward=False, drop_mult=0.5, is_imbalanced=False, lang='si'):
+        self.__data = data
+        # self.lm_fns = lm_fns
+        # self.mdl_path = mdl_path
+        # self.model_store_path = model_store_path
+        self.__classifiers_store_path = classifiers_store_path
+        self.__task_id = task_id
+        self.__is_backward = is_backward
+        self.__drop_mult = drop_mult
+        self.__is_imbalanced = is_imbalanced
+        # self.lang = lang
+        super().__init__(self)
 
-    def retrieve_classifier(self, databunch: DataBunch, config: dict, drop_multi_val: float = 1.,
-                            metrics=None) -> 'TextClassifierLearner':
+    def retrieve_classifier(self) -> 'TextClassifierLearner':
+        databunch = self.__data
+        dropout_probs = dict(input=0.25, output=0.1, hidden=0.15, embedding=0.02, weight=0.2)
+        size_of_embedding = 400
+        num_of_hidden_neurons = 1550
+        num_of_layers = 4
+
+        config = dict(emb_sz=size_of_embedding, n_hid=num_of_hidden_neurons, n_layers=num_of_layers,
+                      input_p=dropout_probs['input'], output_p=dropout_probs['output'],
+                      hidden_p=dropout_probs['hidden'],
+                      embed_p=dropout_probs['embedding'], weight_p=dropout_probs['weight'], pad_token=1, qrnn=False)
 
         embedding_size = config['emb_sz']
         num_of_classes = databunch.c
@@ -32,7 +42,7 @@ class ClassifierTrainer(Trainer):
         vocab_size = len(databunch.vocab.itos)
 
         for dropout_key in config.keys():
-            if dropout_key.endswith('_p'): config[dropout_key] *= drop_multi_val
+            if dropout_key.endswith('_p'): config[dropout_key] *= self.__drop_mult
 
         linear_features = [60]
         dropout_ps = [0.1] * len(linear_features)
@@ -50,33 +60,22 @@ class ClassifierTrainer(Trainer):
         return learn
 
     def train(self, grad_unfreeze=True):
-        dropout_probs = dict(input=0.25, output=0.1, hidden=0.15, embedding=0.02, weight=0.2)
-        size_of_embedding = 400
-        num_of_hidden_neurons = 1550
-        num_of_layers = 4
-
-        config = dict(emb_sz=size_of_embedding, n_hid=num_of_hidden_neurons, n_layers=num_of_layers,
-                      input_p=dropout_probs['input'], output_p=dropout_probs['output'],
-                      hidden_p=dropout_probs['hidden'],
-                      embed_p=dropout_probs['embedding'], weight_p=dropout_probs['weight'], pad_token=1, qrnn=False)
-
-        learn = self.retrieve_classifier(self.data, config=config, drop_multi_val=self.drop_mult,
-                                         metrics=[error_rate, accuracy])
+        learn = self.retrieve_classifier()
 
         optar = partial(DiffGrad, betas=(.91, .999), eps=1e-7)
         learn.opt_func = optar
 
-        if self.is_backward:
-            learn.load_encoder(f'{self.lang}fine_tuned_enc_bwd')
+        if self.__is_backward:
+            learn.load_encoder(f'{self.__lang}fine_tuned_enc_bwd')
         else:
-            learn.load_encoder(f'{self.lang}fine_tuned_enc')
+            learn.load_encoder(f'{self.__lang}fine_tuned_enc')
         learn.freeze()
 
         # Find LR
         tuner = HyperParameterTuner(learn)
         lr = tuner.find_optimized_lr()
 
-        if self.is_imbalanced:
+        if self.__is_imbalanced:
             learn.fit_one_cycle(12, lr, callbacks=[SaveModelCallback(learn), OverSamplingCallback(learn),
                                                ReduceLROnPlateauCallback(learn, factor=0.8)])
         else:
@@ -92,7 +91,7 @@ class ClassifierTrainer(Trainer):
         print('Gradual Unfreezing..')
 
         if grad_unfreeze:
-            if self.is_imbalanced:
+            if self.__is_imbalanced:
                 learn.freeze_to(-2)
                 learn.fit_one_cycle(8, lr,
                                     callbacks=[SaveModelCallback(learn), OverSamplingCallback(learn),
@@ -123,7 +122,7 @@ class ClassifierTrainer(Trainer):
         if lr_unfrozed:
             lr = lr_unfrozed
 
-        if self.is_imbalanced:
+        if self.__is_imbalanced:
             learn.fit_one_cycle(6, lr, callbacks=[SaveModelCallback(learn), OverSamplingCallback(learn),
                                                   ReduceLROnPlateauCallback(learn, factor=0.8)])
             learn.fit_one_cycle(6, lr / 2, callbacks=[SaveModelCallback(learn), OverSamplingCallback(learn),
@@ -150,13 +149,13 @@ class ClassifierTrainer(Trainer):
             learn = classifier_initial
             print('The new accuracy is {0} %.'.format(classifier_initial_accuracy))
 
-        if self.is_backward:
+        if self.__is_backward:
             # learn.save(f'{self.lang}_clas_bwd')
-            pkl_name = self.classifiers_store_path[1] + self.task_id + ".pkl"
+            pkl_name = self.__classifiers_store_path[1] + self.__task_id + ".pkl"
             learn.export(pkl_name)
         else:
             # learn.save(f'{self.lang}_clas')
-            pkl_name = self.classifiers_store_path[0] + self.task_id + ".pkl"
+            pkl_name = self.__classifiers_store_path[0] + self.__task_id + ".pkl"
             learn.export(pkl_name)
 
         return learn

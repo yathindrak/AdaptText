@@ -4,10 +4,10 @@ from flask_praetorian import auth_required
 from ..utils.http_utils import make_err_response
 from ..connection.initializers import guard
 
-auth_routes = Blueprint('auth', __name__)
+auth_controller = Blueprint('auth', __name__)
 
 
-@auth_routes.route('/login', methods=['POST'])
+@auth_controller.route('/login', methods=['POST'])
 def login():
     json_obj = request.get_json()
     if not json_obj:
@@ -25,13 +25,13 @@ def login():
     return jsonify({'access_token': token}), 200
 
 
-@auth_routes.route('/protected')
-@auth_required
-def protected():
-    return jsonify({'result': 'You are in a special area!'}), 200
+# @auth_controller.route('/protected')
+# @auth_required
+# def protected():
+#     return jsonify({'result': 'You are in a special area!'}), 200
 
 
-@auth_routes.route('/refresh', methods=['POST'])
+@auth_controller.route('/refresh', methods=['POST'])
 def refresh():
     json_data = request.get_json()
 

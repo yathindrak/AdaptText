@@ -1,26 +1,27 @@
 from ..fastai1.text import *
 from ..fastai1.basics import *
-from .base_data_bunch_loader import BaseDataBunchLoader
+from .data_bunch_loader import DataBunchLoader
 
 
-class BaseLMDataBunchLoader(BaseDataBunchLoader):
-    def __init__(self, path, splitting_ratio, seed=42, bs=128, is_backward=False, lang='si'):
-        self.path = path
-        self.splitting_ratio = splitting_ratio
-        self.seed = seed
-        self.bs = bs
-        self.is_backward = is_backward
-        self.lang = lang
+class BaseLMDataBunchLoader(DataBunchLoader):
+    def __init__(self, path, splitting_ratio):
+        self.__path = path
+        self.__splitting_ratio = splitting_ratio
+        # self.__seed = seed
+        # self.__bs = bs
+        # self.__is_backward = is_backward
+        # self.__lang = lang
+        super().__init__(self)
 
     def load(self):
         tokenizer = Tokenizer(SpacyTokenizer, lang="xx")
-        data = (TextList.from_folder(Path(self.path), processor=[OpenFileProcessor(), TokenizeProcessor(tokenizer=tokenizer),NumericalizeProcessor(max_vocab=30000)])
-                .split_by_rand_pct(self.splitting_ratio, seed=self.seed)
+        data = (TextList.from_folder(Path(self.__path), processor=[OpenFileProcessor(), TokenizeProcessor(tokenizer=tokenizer), NumericalizeProcessor(max_vocab=30000)])
+                .split_by_rand_pct(self.__splitting_ratio, seed=self.__seed)
                 .label_for_lm()
-                .databunch(bs=self.bs, num_workers=1, backwards=self.is_backward))
+                .databunch(bs=self.__bs, num_workers=1, backwards=self.__is_backward))
         # Store data
-        data.save(f'{self.lang}_databunch')
-        print(len(data.vocab.itos), len(data.train_ds))
+        data.save(f'{self.__lang}_databunch')
+        print(len(data.__vocab.itos), len(data.train_ds))
         # Load data
         # data = load_data(self.path, f'{self.lang}_databunch', bs=self.bs)
         return data

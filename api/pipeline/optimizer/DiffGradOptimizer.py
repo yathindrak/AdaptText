@@ -68,7 +68,7 @@ class DiffGrad(Optimizer):
             for p in group['params']:
                 if p.grad is None:
                     continue
-                grad = p.grad.data
+                grad = p.grad.__data
                 if grad.is_sparse:
                     raise RuntimeError('diffGrad does not support sparse gradients, please consider SparseAdam instead')
 
@@ -78,11 +78,11 @@ class DiffGrad(Optimizer):
                 if len(state) == 0:
                     state['step'] = 0
                     # Exponential moving average of gradient values
-                    state['exp_avg'] = torch.zeros_like(p.data)
+                    state['exp_avg'] = torch.zeros_like(p.__data)
                     # Exponential moving average of squared gradient values
-                    state['exp_avg_sq'] = torch.zeros_like(p.data)
+                    state['exp_avg_sq'] = torch.zeros_like(p.__data)
                     # Previous gradient
-                    state['previous_grad'] = torch.zeros_like(p.data)
+                    state['previous_grad'] = torch.zeros_like(p.__data)
 
                 exp_avg, exp_avg_sq, previous_grad = state['exp_avg'], state['exp_avg_sq'], state['previous_grad']
                 beta1, beta2 = group['betas']
@@ -90,7 +90,7 @@ class DiffGrad(Optimizer):
                 state['step'] += 1
 
                 if group['weight_decay'] != 0:
-                    grad.add_(group['weight_decay'], p.data)
+                    grad.add_(group['weight_decay'], p.__data)
 
                 # Decay the first and second moment running average coefficient
                 exp_avg.mul_(beta1).add_(1 - beta1, grad)
@@ -122,6 +122,6 @@ class DiffGrad(Optimizer):
 
                 step_size = group['lr'] * math.sqrt(bias_correction2) / bias_correction1
 
-                p.data.addcdiv_(-step_size, exp_avg1, denom)
+                p.__data.addcdiv_(-step_size, exp_avg1, denom)
 
         return loss

@@ -1,7 +1,7 @@
 import pusher
 
 
-class Server:
+class PusherPublisher:
     def __init__(self):
         self.instance = pusher.Pusher(
             app_id='1167312',

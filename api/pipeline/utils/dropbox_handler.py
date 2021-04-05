@@ -64,7 +64,7 @@ class DropboxHandler:
             metadata, res = self.dbx.files_download(file_from)
             f.write(res.content)
 
-    def download_clasifier_model(self, zip_file_name, destination):
+    def download_classifier_model(self, zip_file_name, destination):
         file_from = f'/adapttext/models/{zip_file_name}'
 
         with open(zip_file_name, "wb") as f:

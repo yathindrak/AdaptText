@@ -7,17 +7,19 @@ from ..fastai1.tabular import *
 
 
 class EnsembleTrainer(Trainer):
-    def __init__(self, learn_clas_fwd, learn_clas_bwd, classifiers_store_path, task_id, drop_mult=0.5, lang='si'):
-        self.learn_clas_fwd = learn_clas_fwd
-        self.learn_clas_bwd = learn_clas_bwd
-        self.classifiers_store_path = classifiers_store_path
-        self.task_id = task_id
-        self.drop_mult = drop_mult
-        self.lang = lang
+    def __init__(self, learn_clas_fwd, learn_clas_bwd, classifiers_store_path, task_id):
+        self.__learn_clas_fwd = learn_clas_fwd
+        self.__learn_clas_bwd = learn_clas_bwd
+        self.__classifiers_store_path = classifiers_store_path
+        self.__task_id = task_id
+        # self.drop_mult = drop_mult
+        # self.lang = lang
+        super().__init__(self)
 
-    def retrieve_classifier(self, metrics=None):
-        pred_tensors_fwd, pred_tensors_target_fwd = self.learn_clas_fwd.get_preds(DatasetType.Valid, ordered=True)
-        pred_tensors_bwd, pred_tensors_target_bwd = self.learn_clas_bwd.get_preds(DatasetType.Valid, ordered=True)
+    def retrieve_classifier(self):
+        metrics = [error_rate, accuracy]
+        pred_tensors_fwd, pred_tensors_target_fwd = self.__learn_clas_fwd.get_preds(DatasetType.Valid, ordered=True)
+        pred_tensors_bwd, pred_tensors_target_bwd = self.__learn_clas_bwd.get_preds(DatasetType.Valid, ordered=True)
 
         preds_fwd = pd.DataFrame(pred_tensors_fwd.numpy()).add_prefix('fwd_')
         preds_textm_bwd = pd.DataFrame(pred_tensors_bwd.numpy()).add_prefix('bwd_')
@@ -56,7 +58,7 @@ class EnsembleTrainer(Trainer):
         learn.fit_one_cycle(8, lr, callbacks=[SaveModelCallback(learn),
                                               ReduceLROnPlateauCallback(learn, factor=0.8)])
 
-        pkl_name = self.classifiers_store_path[2] + self.task_id + ".pkl"
+        pkl_name = self.__classifiers_store_path[2] + self.__task_id + ".pkl"
         learn.export(pkl_name)
 
         return learn

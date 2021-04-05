@@ -1,7 +1,7 @@
 from filestack import Client
 
 
-class ImageUtils:
+class ImageStorage:
     def __init__(self):
         self.client = Client("A2BIWbSEXSUKDLgjKn6fgz")
 
