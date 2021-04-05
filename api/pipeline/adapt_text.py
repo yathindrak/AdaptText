@@ -208,7 +208,7 @@ class AdaptText:
         web_socket.publish_classifier_progress(task_id, 9)
         self.update_progress(task_id, 9)
 
-        vocab = data_lm.train_ds.__vocab
+        vocab = data_lm.train_ds.vocab
 
         classificationDataBunchLoader = ClassificationDataBunchLoader(df_trn, df_val, text_name, label_name, vocab)
         data_class = classificationDataBunchLoader.load()
