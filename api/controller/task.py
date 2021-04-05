@@ -132,7 +132,7 @@ def execute(id):
 
     lang = 'si'
     app_root = "/storage"
-    bs = 60
+    bs = 128
     splitting_ratio = 0.1
     adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.continuous_train,
                            is_imbalanced=meta_info.is_imbalanced)
