@@ -7,7 +7,8 @@ from ..optimizer.DiffGradOptimizer import DiffGrad
 
 
 class BaseLMTrainer(Trainer):
-    def __init__(self, data, lm_fns, mdl_path, model_store_path, is_gpu=True, drop_mult=0.9):
+    def __init__(self, data, lm_fns, mdl_path, model_store_path, is_gpu=True, drop_mult=0.9, *args, **kwargs):
+        super(BaseLMTrainer, self).__init__(*args, **kwargs)
         self.__data = data
         self.__lm_fns = lm_fns
         self.__mdl_path = mdl_path
@@ -15,7 +16,7 @@ class BaseLMTrainer(Trainer):
         self.__drop_mult = drop_mult
         # self.lang = lang
         self.__is_gpu = is_gpu
-        super().__init__(self)
+        # super().__init__(self)
 
     def retrieve_lm(self, pretrained_paths: OptStrTuple = None) -> 'LanguageLearner':
         databunch = self.__data

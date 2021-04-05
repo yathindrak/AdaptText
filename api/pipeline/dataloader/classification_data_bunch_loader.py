@@ -3,7 +3,8 @@ from .data_bunch_loader import DataBunchLoader
 
 
 class ClassificationDataBunchLoader(DataBunchLoader):
-    def __init__(self, df_train_set, df_val_set, text_col_name, label_col_name, vocab, is_backward=False):
+    def __init__(self, df_train_set, df_val_set, text_col_name, label_col_name, vocab, is_backward=False, *args, **kwargs):
+        super(ClassificationDataBunchLoader, self).__init__(*args, **kwargs)
         self.__df_train_set = df_train_set
         self.__df_val_set = df_val_set
         self.__text_col_name = text_col_name
@@ -12,7 +13,6 @@ class ClassificationDataBunchLoader(DataBunchLoader):
         self.__is_backward = is_backward
         self.__vocab = vocab
         # self.__lang = lang
-        super().__init__(self)
 
     def load(self):
         item_counts = self.__df_train_set[self.__label_col_name].value_counts()

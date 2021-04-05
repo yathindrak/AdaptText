@@ -4,14 +4,15 @@ from .data_bunch_loader import DataBunchLoader
 
 
 class BaseLMDataBunchLoader(DataBunchLoader):
-    def __init__(self, path, splitting_ratio):
+    def __init__(self, path, splitting_ratio, *args, **kwargs):
+        super(BaseLMDataBunchLoader, self).__init__(*args, **kwargs)
         self.__path = path
         self.__splitting_ratio = splitting_ratio
         # self.__seed = seed
         # self.__bs = bs
         # self.__is_backward = is_backward
         # self.__lang = lang
-        super().__init__(self)
+        # super().__init__(self)
 
     def load(self):
         tokenizer = Tokenizer(SpacyTokenizer, lang="xx")

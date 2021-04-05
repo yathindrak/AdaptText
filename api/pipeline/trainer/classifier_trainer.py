@@ -8,7 +8,8 @@ from ..evaluator.evaluator import Evaluator
 import copy
 
 class ClassifierTrainer(Trainer):
-    def __init__(self, data, classifiers_store_path, task_id, is_backward=False, drop_mult=0.5, is_imbalanced=False, lang='si'):
+    def __init__(self, data, classifiers_store_path, task_id, is_backward=False, drop_mult=0.5, is_imbalanced=False, *args, **kwargs):
+        super(ClassifierTrainer, self).__init__(*args, **kwargs)
         self.__data = data
         # self.lm_fns = lm_fns
         # self.mdl_path = mdl_path
@@ -19,7 +20,7 @@ class ClassifierTrainer(Trainer):
         self.__drop_mult = drop_mult
         self.__is_imbalanced = is_imbalanced
         # self.lang = lang
-        super().__init__(self)
+        # super().__init__(self)
 
     def retrieve_classifier(self) -> 'TextClassifierLearner':
         databunch = self.__data

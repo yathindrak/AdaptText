@@ -7,14 +7,15 @@ from ..fastai1.tabular import *
 
 
 class EnsembleTrainer(Trainer):
-    def __init__(self, learn_clas_fwd, learn_clas_bwd, classifiers_store_path, task_id):
+    def __init__(self, learn_clas_fwd, learn_clas_bwd, classifiers_store_path, task_id, *args, **kwargs):
+        super(EnsembleTrainer, self).__init__(*args, **kwargs)
         self.__learn_clas_fwd = learn_clas_fwd
         self.__learn_clas_bwd = learn_clas_bwd
         self.__classifiers_store_path = classifiers_store_path
         self.__task_id = task_id
         # self.drop_mult = drop_mult
         # self.lang = lang
-        super().__init__(self)
+        # super().__init__(self)
 
     def retrieve_classifier(self):
         metrics = [error_rate, accuracy]
