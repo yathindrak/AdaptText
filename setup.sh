@@ -92,10 +92,10 @@ chmod 777 /home/thilisadunik/adapttext/api/error.log
 mkdir optimizer
 # PS : comment this out and clone this to the root in react root, only in web app
 # git clone https://gitlab.com/yathindra/fastai1.git
+cd pipeline
 git clone https://github.com/lessw2020/Best-Deep-Learning-Optimizers.git
 cp ./Best-Deep-Learning-Optimizers/diffgrad/diffgrad.py ./optimizer/DiffGradOptimizer.py
 rm -rf ./Best-Deep-Learning-Optimizers
-cd pipeline
 git clone https://gitlab.com/yathindra/fastai1.git
 cd ..
 cd ..
