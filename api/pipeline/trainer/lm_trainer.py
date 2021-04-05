@@ -59,8 +59,8 @@ class LMTrainer(Trainer):
         return learn
 
     def train(self):
-        lm_fn_1_fwd = self.__mdl_path / f'{self.__lang}_wt.pth'
-        lm_fn_1_bwd = self.__mdl_path / f'{self.__lang}_wt_bwd.pth'
+        lm_fn_1_fwd = self.__mdl_path / f'{self._lang}_wt.pth'
+        lm_fn_1_bwd = self.__mdl_path / f'{self._lang}_wt_bwd.pth'
 
         if ((not self.__is_backward and lm_fn_1_fwd.exists()) or (self.__is_backward and lm_fn_1_bwd.exists())):
             if self.__is_gpu:
@@ -96,8 +96,8 @@ class LMTrainer(Trainer):
 
             # learn.data.vocab.save('/content/data/siwiki/models/si_wt_vocab_bwd.pkl')
 
-            learn.save(f'{self.__lang}fine_tuned_bwd')
-            learn.save_encoder(f'{self.__lang}fine_tuned_enc_bwd')
+            learn.save(f'{self._lang}fine_tuned_bwd')
+            learn.save_encoder(f'{self._lang}fine_tuned_enc_bwd')
         else:
             # comment below 2 lines of code out to avoid overriding base lm: cause errors otherwise
             # learn.to_fp32().save(self.mdl_path / self.lm_fns[0], with_opt=False)
@@ -105,5 +105,5 @@ class LMTrainer(Trainer):
 
             # learn.data.vocab.save('/content/data/siwiki/models/si_wt_vocab.pkl')
 
-            learn.save(f'{self.__lang}fine_tuned')
-            learn.save_encoder(f'{self.__lang}fine_tuned_enc')
+            learn.save(f'{self._lang}fine_tuned')
+            learn.save_encoder(f'{self._lang}fine_tuned_enc')
