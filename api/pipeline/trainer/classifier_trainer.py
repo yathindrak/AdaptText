@@ -116,8 +116,8 @@ class ClassifierTrainer(Trainer):
         print('Completely Unfreezing..')
 
         learn.unfreeze()
-        learn.purge()
-        torch.cuda.empty_cache()
+        # learn.purge()
+        # torch.cuda.empty_cache()
 
         tuner = HyperParameterTuner(learn)
         lr_unfrozed = tuner.find_optimized_lr()
