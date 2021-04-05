@@ -37,8 +37,8 @@ class ClassifierTrainer(Trainer):
         embedding_size = config['emb_sz']
         num_of_classes = databunch.c
         split_function = awd_lstm_clas_split
-        back_propagation_through_time_val = 80
-        max_input_sequence_length = 80 * 20
+        back_propagation_through_time_val = 70
+        max_input_sequence_length = 70 * 20
         padding_idx = 1
         vocab_size = len(databunch.vocab.itos)
 
