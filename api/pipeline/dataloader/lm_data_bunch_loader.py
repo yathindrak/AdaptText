@@ -5,7 +5,7 @@ from .data_bunch_loader import DataBunchLoader
 
 class LMDataBunchLoader(DataBunchLoader):
     def __init__(self, df_train_set, df_val_set, text_col_name, label_col_name, app_root,
-                 continuous_train=False):
+                 continuous_train=False, is_backward=False):
         self.__df_train_set = df_train_set
         self.__df_val_set = df_val_set
         self.__text_col_name = text_col_name
@@ -13,7 +13,7 @@ class LMDataBunchLoader(DataBunchLoader):
         self.__continuous_train = continuous_train
         self.__app_root = app_root
         # self.__bs = bs
-        # self.__is_backward = is_backward
+        self.__is_backward = is_backward
         # self.__lang = lang
         super().__init__(self)
 
