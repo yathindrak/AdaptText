@@ -67,9 +67,9 @@ class ClassifierTrainer(Trainer):
         learn.opt_func = optar
 
         if self.__is_backward:
-            learn.load_encoder(f'{self.__lang}fine_tuned_enc_bwd')
+            learn.load_encoder(f'{self._lang}fine_tuned_enc_bwd')
         else:
-            learn.load_encoder(f'{self.__lang}fine_tuned_enc')
+            learn.load_encoder(f'{self._lang}fine_tuned_enc')
         learn.freeze()
 
         # Find LR

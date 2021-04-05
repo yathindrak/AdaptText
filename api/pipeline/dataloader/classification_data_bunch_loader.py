@@ -24,10 +24,10 @@ class ClassificationDataBunchLoader(DataBunchLoader):
                                          backwards=self.__is_backward)
 
         if self.__is_backward:
-            data.save(f'{self.__lang}_data_class_bwd.pkl')
+            data.save(f'{self._lang}_data_class_bwd.pkl')
             # data = load_data('./', f'{self.lang}_data_class_bwd.pkl')
         else:
-            data.save(f'{self.__lang}_data_class_fwd.pkl')
+            data.save(f'{self._lang}_data_class_fwd.pkl')
             # data = load_data('./', f'{self.lang}_data_class_fwd.pkl', bs=64)
 
         return data

@@ -1,6 +1,6 @@
 class Trainer:
     def __init__(self, lang='si'):
-        self.__lang = lang
+        self._lang = lang
 
     def train(self):
         pass

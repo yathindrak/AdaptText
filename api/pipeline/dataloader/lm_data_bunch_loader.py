@@ -28,9 +28,9 @@ class LMDataBunchLoader(DataBunchLoader):
                                        text_cols=self.__text_col_name, tokenizer=tokenizer, backwards=self.__is_backward)
 
         if self.__is_backward:
-            data.save(f'{self.__lang}_data_lm_bwd.pkl')
+            data.save(f'{self._lang}_data_lm_bwd.pkl')
             # data = load_data('./', f'{lang}_data_lm_bwd.pkl')
         else:
-            data.save(f'{self.__lang}_data_lm_fwd.pkl')
+            data.save(f'{self._lang}_data_lm_fwd.pkl')
             # data = load_data('./', f'{lang}_data_lm_fwd.pkl')
         return data
