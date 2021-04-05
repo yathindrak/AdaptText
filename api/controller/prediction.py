@@ -8,11 +8,9 @@ from flask_praetorian import auth_required
 from ..pipeline.fastai1.basic_train import load_learner
 from ..pipeline.predictor.predictor import Predictor
 from ..pipeline.utils.dropbox_handler import DropboxHandler
-from ..pipeline.utils.zip_handler import ZipHandler
 from ..models.metainfo import MetaInfo
 from ..models.user import User
 from ..models.task import Task
-from ..utils.http_utils import make_err_response
 
 prediction_controller = Blueprint('prediction', __name__)
 
@@ -25,7 +23,8 @@ def load_classifier(id):
     current_user = User.lookup(flask_praetorian.current_user().username)
 
     if get_task.user_id != current_user.id:
-        return make_err_response('Not found', 'Model not found', 404)
+        return make_response(
+            jsonify({'error': 'Not found', 'message': 'Model not found', 'status_code': 404}), 404)
 
     model_path = get_task.model_path
 
@@ -56,7 +55,8 @@ def predict(task_id, text):
     current_user = User.lookup(flask_praetorian.current_user().username)
 
     if get_task.user_id != current_user.id:
-        return make_err_response('Not found', 'Model not found', 404)
+        return make_response(
+            jsonify({'error': 'Not found', 'message': 'Model not found', 'status_code': 404}), 404)
 
     meta_info = MetaInfo.query.filter_by(task_id=task_id).first()
 
@@ -67,7 +67,7 @@ def predict(task_id, text):
     learn_classifier_bwd = load_learner(classifier_dir, classifiers_store_path[1] + str(get_task.id) + ".pkl")
     learn_classifier_ensemble = load_learner(classifier_dir, classifiers_store_path[2] + str(get_task.id) + ".pkl")
 
-    predictor = Predictor(learn_classifier_fwd, learn_classifier_bwd, learn_classifier_ensemble, meta_info.classes)
+    predictor = Predictor(learn_classifier_fwd, learn_classifier_bwd, learn_classifier_ensemble, meta_info.__classes)
 
     prediction = predictor.predict(text)
 

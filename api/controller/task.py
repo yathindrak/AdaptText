@@ -16,7 +16,6 @@ from ..models.metainfo import MetaInfo
 from ..schemas.task import TaskSchema
 from ..models.user import User
 from ..models.task import Task
-from ..utils.http_utils import make_err_response
 from ..connection.initializers import database
 
 task_controller = Blueprint('task', __name__)
@@ -29,7 +28,8 @@ def create():
     logger.info('Initiating task...')
     json_obj = request.get_json()
     if not json_obj:
-        return make_err_response('Bad Request', 'No valid entries provided', 400)
+        return make_response(
+            jsonify({'error': 'Bad Request', 'message': 'No valid entries provided', 'status_code': 400}), 400)
     try:
         name = json_obj['name']
         description = json_obj['description']
@@ -44,7 +44,8 @@ def create():
         # task_id = id
     except:
         logger.info('No valid entries provided')
-        return make_err_response('Bad Request', 'No valid entries provided', 400)
+        return make_response(
+            jsonify({'error': 'Bad Request', 'message': 'No valid entries provided', 'status_code': 400}), 400)
 
     model_path = None
     current_user = User.lookup(flask_praetorian.current_user().username)
@@ -56,7 +57,8 @@ def create():
         database.session.add(get_task)
         database.session.commit()
     except IntegrityError:
-        return make_err_response('Bad Request', 'Duplicated name entered', 400)
+        return make_response(
+            jsonify({'error': 'Bad Request', 'message': 'Duplicated name entered', 'status_code': 400}), 400)
 
     meta_data = MetaInfo(ds_path=ds_path, ds_text_col=ds_text_col, ds_label_col=ds_label_col,
                          continuous_train=continuous_train, is_imbalanced=is_imbalanced, accuracy=accuracy,
@@ -66,7 +68,8 @@ def create():
         database.session.add(meta_data)
         database.session.commit()
     except IntegrityError:
-        return make_err_response('Bad Request', 'Duplicated name entered', 400)
+        return make_response(
+            jsonify({'error': 'Bad Request', 'message': 'Duplicated name entered', 'status_code': 400}), 400)
 
     meta_info_schema = MetaInfoSchema()
     meta_data = meta_info_schema.dump(meta_data)
@@ -102,7 +105,8 @@ def upload_csv():
         return make_response(jsonify({"file_path": file_path, "column_names": csv_column_names[0]}), 201)
 
     else:
-        return make_err_response('Bad Request', 'Invalid file provided', 400)
+        return make_response(
+            jsonify({'error': 'Bad Request', 'message': 'Invalid file provided', 'status_code': 400}), 400)
 
 
 def update_progress(task_id, progress):
@@ -116,7 +120,8 @@ def update_progress(task_id, progress):
 @auth_required
 def execute(id):
     if not id:
-        return make_err_response('Bad Request', 'No id provided', 400)
+        return make_response(
+            jsonify({'error': 'Bad Request', 'message': 'No id provided', 'status_code': 400}), 400)
 
     meta_info = MetaInfo.query.filter_by(task_id=id).first()
     model_path = None
@@ -129,8 +134,8 @@ def execute(id):
     app_root = "/storage"
     bs = 128
     splitting_ratio = 0.1
-    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.__continuous_train,
-                           is_imbalanced=meta_info.__is_imbalanced)
+    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.continuous_train,
+                           is_imbalanced=meta_info.is_imbalanced)
 
     pd.set_option('display.max_colwidth', -1)
     # path_to_csv="sinhala-hate-speech-dataset.csv"
@@ -217,7 +222,8 @@ def get_by_id(id):
     current_user = User.lookup(flask_praetorian.current_user().username)
 
     if get_task.user_id != current_user.id:
-        return make_err_response('Not found', 'Task not found', 404)
+        return make_response(
+            jsonify({'error': 'Bad Request', 'message': 'Task not found', 'status_code': 404}), 404)
 
     task_schema = TaskSchema()
     task = task_schema.dump(get_task)
