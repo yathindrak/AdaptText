@@ -225,7 +225,7 @@ class AdaptText:
 
         # data_class_bwd.show_batch()
 
-        classes = data_class.__classes
+        classes = data_class.classes
 
         web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 13)
