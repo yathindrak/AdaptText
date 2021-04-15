@@ -262,7 +262,7 @@ class AdaptText:
         web_socket.publish_classifier_progress(task_id, 70)
         self.update_progress(task_id, 70)
 
-        ensembleTrainer = EnsembleTrainer(classifierModelFWD, classifierModelBWD, self.__classifiers_store_path, task_id)
+        ensembleTrainer = EnsembleTrainer(classifierModelFWD, classifierModelBWD, classes, self.__classifiers_store_path, task_id)
         ensembleModel = ensembleTrainer.train()
 
         web_socket = PusherPublisher()

@@ -37,8 +37,8 @@ class ClassifierTrainer(Trainer):
         embedding_size = config['emb_sz']
         num_of_classes = databunch.c
         split_function = awd_lstm_clas_split
-        back_propagation_through_time_val = 70
-        max_input_sequence_length = 70 * 10
+        back_propagation_through_time_val = 80
+        max_input_sequence_length = 80 * 20
         padding_idx = 1
         vocab_size = len(databunch.vocab.itos)
 
@@ -87,7 +87,6 @@ class ClassifierTrainer(Trainer):
         print('Gradual Unfreezing..')
 
         if grad_unfreeze:
-
             learn.freeze_to(-2)
             learn.fit_one_cycle(8, lr,
                                 callbacks=[SaveModelCallback(learn),
@@ -101,8 +100,6 @@ class ClassifierTrainer(Trainer):
         print('Completely Unfreezing..')
 
         learn.unfreeze()
-        # learn.purge()
-        # torch.cuda.empty_cache()
 
         tuner = HyperParameterTuner(learn)
         lr_unfrozed = tuner.find_optimized_lr()
@@ -114,9 +111,6 @@ class ClassifierTrainer(Trainer):
                                               ReduceLROnPlateauCallback(learn, factor=0.8)])
         learn.fit_one_cycle(6, lr / 2, callbacks=[SaveModelCallback(learn),
                                                   ReduceLROnPlateauCallback(learn, factor=0.8)])
-        learn.fit_one_cycle(8, lr,
-                            callbacks=[SaveModelCallback(learn, every='improvement', monitor='accuracy'),
-                                       ReduceLROnPlateauCallback(learn, factor=0.8)])
 
         print('Completed Unfreezing..')
 

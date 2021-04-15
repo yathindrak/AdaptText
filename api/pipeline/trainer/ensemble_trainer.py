@@ -7,12 +7,13 @@ from ..fastai1.tabular import *
 
 
 class EnsembleTrainer(Trainer):
-    def __init__(self, learn_clas_fwd, learn_clas_bwd, classifiers_store_path, task_id, *args, **kwargs):
+    def __init__(self, learn_clas_fwd, learn_clas_bwd, classes, classifiers_store_path, task_id, *args, **kwargs):
         super(EnsembleTrainer, self).__init__(*args, **kwargs)
         self.__learn_clas_fwd = learn_clas_fwd
         self.__learn_clas_bwd = learn_clas_bwd
         self.__classifiers_store_path = classifiers_store_path
         self.__task_id = task_id
+        self.__classes = classes
         # self.drop_mult = drop_mult
         # self.lang = lang
         # super().__init__(self)
@@ -31,6 +32,8 @@ class EnsembleTrainer(Trainer):
                        .join(preds_target_fwd).rename(columns={0: "target"})
                        )
 
+        ensemble_df["target"].replace(list(range(0, len(self.__classes))), self.__classes, inplace=True)
+
         column_names = ensemble_df.columns.values.tolist()
         column_names.pop()
 
@@ -42,7 +45,7 @@ class EnsembleTrainer(Trainer):
                          .label_from_df(cols="target")
                          .databunch())
 
-        learn = tabular_learner(data_ensemble, layers=[200, 100], metrics=metrics)
+        learn = tabular_learner(data_ensemble, layers=[1000, 500], ps=[0.001, 0.01], metrics=metrics, emb_drop=0.04)
 
         return learn
 
@@ -58,6 +61,13 @@ class EnsembleTrainer(Trainer):
 
         learn.fit_one_cycle(8, lr, callbacks=[SaveModelCallback(learn),
                                               ReduceLROnPlateauCallback(learn, factor=0.8)])
+
+        learn.fit_one_cycle(8, lr / 2, callbacks=[SaveModelCallback(learn),
+                                                  ReduceLROnPlateauCallback(learn, factor=0.8)])
+
+        learn.fit_one_cycle(8, lr / 2,
+                            callbacks=[SaveModelCallback(learn, every='improvement', monitor='accuracy'),
+                                       ReduceLROnPlateauCallback(learn, factor=0.8)])
 
         pkl_name = self.__classifiers_store_path[2] + self.__task_id + ".pkl"
         learn.export(pkl_name)

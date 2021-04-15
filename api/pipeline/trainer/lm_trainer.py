@@ -56,9 +56,6 @@ class LMTrainer(Trainer):
             learn = learn.load_pretrained(*func_names)
             learn.freeze()
 
-            # learn.purge()
-            # torch.cuda.empty_cache()
-
         return learn
 
     def train(self):

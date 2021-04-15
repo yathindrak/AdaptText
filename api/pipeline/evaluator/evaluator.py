@@ -2,7 +2,6 @@ import uuid
 
 from ...utils.logger import Logger
 from ...utils.image_storage import ImageStorage
-from ..fastai1.text import TextClassificationInterpretation
 from ..fastai1.basics import *
 from sklearn.metrics import classification_report, matthews_corrcoef
 from sklearn.metrics import roc_curve, auc

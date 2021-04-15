@@ -60,16 +60,6 @@ class BaseLMTrainer(Trainer):
         return learn
 
     def train(self):
-        # dropout_probs = dict(input=0.25, output=0.1, hidden=0.15, embedding=0.02, weight=0.2)
-        # size_of_embedding = 400
-        # num_of_hidden_neurons = 1550
-        # num_of_layers = 4
-        #
-        # config = dict(emb_sz=size_of_embedding, n_hid=num_of_hidden_neurons, n_layers=num_of_layers,
-        #               input_p=dropout_probs['input'], output_p=dropout_probs['output'],
-        #               hidden_p=dropout_probs['hidden'], embed_p=dropout_probs['embedding'],
-        #               weight_p=dropout_probs['weight'], pad_token=1, qrnn=False, out_bias=True)
-
         if self.__is_gpu:
             learn = self.retrieve_lm().to_fp16()
         else:

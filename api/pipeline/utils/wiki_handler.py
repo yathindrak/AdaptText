@@ -3,16 +3,16 @@ import emoji
 
 class WikiHandler:
     def __init__(self, lang='si'):
-        self.lang = lang
-        self.lang_code = f'{lang}wiki'
+        self.__lang = lang
+        self.__lang_code = f'{lang}wiki'
 
     # Get wiki articles
     def retrieve_articles(self, path):
-        if (path / self.lang_code).exists():
-            print(f"{path / self.lang_code} wiki-data already exists...")
+        if (path / self.__lang_code).exists():
+            print(f"{path / self.__lang_code} wiki-data already exists...")
             return
 
-        xml_path = f"{self.lang}wiki-latest-pages-articles.xml"
+        xml_path = f"{self.__lang}wiki-latest-pages-articles.xml"
         zip_path = f"{xml_path}.bz2"
 
         # download wiki articles, if not exists
@@ -31,7 +31,7 @@ class WikiHandler:
             os.system(wiki_extraction_cmd)
 
         # Perform directory cleanup
-        shutil.move(str(path / 'text/AA/wiki_00'), str(path / self.lang_code))
+        shutil.move(str(path / 'text/AA/wiki_00'), str(path / self.__lang_code))
         shutil.rmtree(path / 'text')
 
     def prepare_articles(self, path):
@@ -42,8 +42,8 @@ class WikiHandler:
 
         base_lm_data_path.mkdir(exist_ok=True, parents=True)
         heading_regex = re.compile(
-            rf'<doc id="\d+" url="https://{self.lang}.wikipedia.org/wiki\?curid=\d+" title="([^"]+)">')
-        lines_list = (path / self.lang_code).open()
+            rf'<doc id="\d+" url="https://{self.__lang}.wikipedia.org/wiki\?curid=\d+" title="([^"]+)">')
+        lines_list = (path / self.__lang_code).open()
         f = None
 
         for index, line in enumerate(lines_list):
