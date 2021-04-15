@@ -47,7 +47,7 @@ class EnsembleTrainer(Trainer):
         return learn
 
     def train(self):
-        learn = self.retrieve_classifier(metrics=[error_rate, accuracy])
+        learn = self.retrieve_classifier()
 
         optar = partial(DiffGrad, betas=(.91, .999), eps=1e-7)
         learn.opt_func = optar

@@ -39,7 +39,6 @@ def create():
         ds_text_col = json_obj['ds_text_col']
         ds_label_col = json_obj['ds_label_col']
         continuous_train = json_obj['continuous_train']
-        is_imbalanced = json_obj['is_imbalanced']
         accuracy = None
         # task_id = id
     except:
@@ -61,7 +60,7 @@ def create():
             jsonify({'error': 'Bad Request', 'message': 'Duplicated name entered', 'status_code': 400}), 400)
 
     meta_data = MetaInfo(ds_path=ds_path, ds_text_col=ds_text_col, ds_label_col=ds_label_col,
-                         continuous_train=continuous_train, is_imbalanced=is_imbalanced, accuracy=accuracy,
+                         continuous_train=continuous_train, accuracy=accuracy,
                          task_id=get_task.id)
 
     try:
@@ -134,8 +133,7 @@ def execute(id):
     app_root = "/storage"
     bs = 128
     splitting_ratio = 0.1
-    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.continuous_train,
-                           is_imbalanced=meta_info.is_imbalanced)
+    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio, continuous_train=meta_info.continuous_train)
 
     pd.set_option('display.max_colwidth', -1)
     # path_to_csv="sinhala-hate-speech-dataset.csv"

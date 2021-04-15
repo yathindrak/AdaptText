@@ -51,7 +51,7 @@ class Evaluator():
         conf_matrix_fig_url = img_utils.upload(conf_matrix_fig_path)
         roc_curve_fig_url = img_utils.upload(roc_curve_fig_path)
 
-        pred_val = learn.get_preds(DatasetType.Valid, ordered=True)
+        pred_val = learn.get_preds(DatasetType.Valid)
         pred_val_l = pred_val[0].argmax(1)
 
         class_report = classification_report(pred_val[1], pred_val_l, output_dict=True)

@@ -6,14 +6,6 @@ import {
   Nav,
   NavItem,
   NavLink,
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupText,
-  FormInput,
   Collapse,
 } from "shards-react";
 import { useHistory } from 'react-router-dom';
@@ -22,12 +14,12 @@ import { login, authFetch, useAuth, logout } from "../auth";
 export default function NavigationBar() {
   const [logged] = useAuth();
   const history = useHistory();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  // const [dropdownOpen, setDropdownOpen] = useState(false);
   const [collapseOpen, setCollapseOpen] = useState(false);
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
+  // const toggleDropdown = () => {
+  //   setDropdownOpen(!dropdownOpen);
+  // };
 
   const toggleNavbar = () => {
     setCollapseOpen(!collapseOpen);
@@ -53,6 +45,9 @@ export default function NavigationBar() {
           <NavItem>
             <NavLink href="/tasks">Tasks</NavLink>
           </NavItem>
+          <NavItem>
+            <NavLink href="/retrain">Retrain</NavLink>
+          </NavItem>
           {/* <NavItem>
               <NavLink href="#" disabled>
                 Disabled
@@ -63,7 +58,7 @@ export default function NavigationBar() {
               <NavLink href="#" onClick={handleLogout}>Log out</NavLink>
             </NavItem>
           ) : null}
-          <Dropdown open={dropdownOpen} toggle={toggleDropdown}>
+          {/* <Dropdown open={dropdownOpen} toggle={toggleDropdown}>
             <DropdownToggle nav caret>
               Dropdown
             </DropdownToggle>
@@ -72,7 +67,7 @@ export default function NavigationBar() {
               <DropdownItem>Another action</DropdownItem>
               <DropdownItem>Something else here</DropdownItem>
             </DropdownMenu>
-          </Dropdown>
+          </Dropdown> */}
         </Nav>
       </Collapse>
     </Navbar>

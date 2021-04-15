@@ -124,14 +124,14 @@ export default function Login() {
               >
                 Welcome to AdaptText !
               </h4>
-              <p style={{ color: "white", fontWeight: "400" }}>
+              {/* <p style={{ color: "white", fontWeight: "400" }}>
                 We are Lorem ipsum dolor sit amet.Lorem ipsum dolor sit
                 amet.Lorem ipsum dolor sit amet.Lorem ipsum dolor sit amet.
-              </p>
+              </p> */}
             </CardHeader>
             <CardBody>
               <CardTitle>Log In</CardTitle>
-              <p style={{ fontWeight: "400" }}>Lorem ipsum dolor sit amet.</p>
+              <br />
               <FormInput
                 invalid={invalid}
                 onChange={handleUsernameChange}

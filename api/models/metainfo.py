@@ -7,7 +7,6 @@ class MetaInfo(db.Model):
     ds_text_col = db.Column(db.String(50))
     ds_label_col = db.Column(db.String(50))
     continuous_train = db.Column(db.Boolean, nullable=False)
-    is_imbalanced = db.Column(db.Boolean, nullable=False)
     classes = db.Column(db.ARRAY(db.String))
     accuracy = db.Column(db.Float)
     err = db.Column(db.Float)
