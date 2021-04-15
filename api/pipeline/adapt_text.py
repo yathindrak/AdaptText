@@ -122,6 +122,7 @@ class AdaptText:
         # if (not Path(self.base_lm_data_path).exists()):
         #     print("Base LM corpus not found, preparing the corpus...")
         self.prepare_base_lm_corpus()
+        logger = Logger()
 
         web_socket = PusherPublisher()
         web_socket.publish_lm_progress(20)
@@ -137,12 +138,14 @@ class AdaptText:
         model_store_path_bwd = self.__mdl_path / Path(f'{self.__lang}_wt_vocab_bwd.pkl')
 
         web_socket.publish_lm_progress(40)
+        logger.info('Loaded BaseLM data...')
 
         # forward
         lmTrainer_fwd = BaseLMTrainer(data_lm_fwd, self.__lm_fns, self.__mdl_path, model_store_path, is_gpu=self.is_gpu)
         lmTrainer_fwd.train()
 
         web_socket.publish_lm_progress(70)
+        logger.info('Trained forward BaseLM...')
 
         # backward
         lmTrainer_bwd = BaseLMTrainer(data_lm_bwd, self.__lm_fns_bwd, self.__mdl_path, model_store_path_bwd,
@@ -150,6 +153,7 @@ class AdaptText:
         lmTrainer_bwd.train()
 
         web_socket.publish_lm_progress(90)
+        logger.info('Trained backward BaseLM...')
 
     def update_progress(self, task_id, progress):
         database.session.query(Task).filter_by(id=task_id).update({"progress": progress})

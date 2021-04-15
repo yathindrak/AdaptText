@@ -37,12 +37,10 @@ export default function Home() {
   const [textColumnName, setTextColumnName] = useState("");
   const [labelColumnName, setLabelColumnName] = useState("");
   const [continuousTrain, setContinuousTrain] = useState(true);
-  const [isImbalanced, setIsImbalanced] = useState(false);
   const [
     isOpenContinousTrainTooltip,
     setIsOpenContinousTrainTooltip,
   ] = useState(false);
-  const [isOpenImbalancedTooltip, setIsOpenImbalancedTooltip] = useState(false);
 
   const history = useHistory();
 
@@ -81,17 +79,8 @@ export default function Home() {
     setContinuousTrain(!continuousTrain);
   };
 
-  const toggleImbalanced = (e) => {
-    e.preventDefault();
-    setIsImbalanced(!isImbalanced);
-  };
-
   const toggleContinousTrainTooltip = (e) => {
     setIsOpenContinousTrainTooltip(!isOpenContinousTrainTooltip);
-  };
-
-  const toggleIsOpenImbalancedTooltip = (e) => {
-    setIsOpenImbalancedTooltip(!isOpenImbalancedTooltip);
   };
 
   const onSubmitExecute = (e) => {
@@ -109,7 +98,6 @@ export default function Home() {
         ds_text_col: textColumnName,
         ds_label_col: labelColumnName,
         continuous_train: continuousTrain,
-        is_imbalanced: isImbalanced,
       };
       authFetch(`/api/task`, {
         method: "POST",
@@ -353,34 +341,6 @@ export default function Home() {
               toggle={toggleContinousTrainTooltip}
             >
               By ticking, Your data would be used to optimize the algorithm
-            </Tooltip>
-
-            <div className="mt-4" style={{ display: "flex" }}>
-              <FormCheckbox
-                checked={isImbalanced}
-                onChange={(e) => toggleImbalanced(e)}
-              >
-                Is the dataset imbalanced ?
-              </FormCheckbox>
-              <svg
-                id="imbalancedTooltip"
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                className="bi bi-info-circle-fill"
-                viewBox="0 0 16 16"
-                style={{ marginTop: "2px", marginLeft: "6px" }}
-              >
-                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412l-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-              </svg>
-            </div>
-            <Tooltip
-              open={isOpenImbalancedTooltip}
-              target="#imbalancedTooltip"
-              toggle={toggleIsOpenImbalancedTooltip}
-            >
-              By ticking, upsampling would be done, hence would take much training time
             </Tooltip>
 
             <Button

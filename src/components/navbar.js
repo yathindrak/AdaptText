@@ -8,18 +8,15 @@ import {
   NavLink,
   Collapse,
 } from "shards-react";
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation  } from 'react-router-dom';
 import { login, authFetch, useAuth, logout } from "../auth";
 
 export default function NavigationBar() {
   const [logged] = useAuth();
   const history = useHistory();
-  // const [dropdownOpen, setDropdownOpen] = useState(false);
   const [collapseOpen, setCollapseOpen] = useState(false);
 
-  // const toggleDropdown = () => {
-  //   setDropdownOpen(!dropdownOpen);
-  // };
+  const location = useLocation();
 
   const toggleNavbar = () => {
     setCollapseOpen(!collapseOpen);
@@ -32,42 +29,27 @@ export default function NavigationBar() {
   }
   return (
     <Navbar type="dark" theme="primary" expand="md">
-      <NavbarBrand href="#">AdaptText</NavbarBrand>
+      <NavbarBrand href="/">AdaptText</NavbarBrand>
       <NavbarToggler onClick={toggleNavbar} />
 
       <Collapse open={collapseOpen} navbar>
         <Nav navbar className="ml-auto">
           <NavItem>
-            <NavLink active href="/">
+            <NavLink active={(location.pathname === '/') ? true:false} style={{fontWeight: (location.pathname === '/') ? "500":"400"}} href="/">
               Create
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink href="/tasks">Tasks</NavLink>
+            <NavLink active={(location.pathname === '/tasks') ? true:false} href="/tasks">Tasks</NavLink>
           </NavItem>
           <NavItem>
-            <NavLink href="/retrain">Retrain</NavLink>
+            <NavLink active={(location.pathname === '/retrain') ? true:false} href="/retrain">Retrain</NavLink>
           </NavItem>
-          {/* <NavItem>
-              <NavLink href="#" disabled>
-                Disabled
-              </NavLink>
-            </NavItem> */}
           {logged ? (
             <NavItem>
               <NavLink href="#" onClick={handleLogout}>Log out</NavLink>
             </NavItem>
           ) : null}
-          {/* <Dropdown open={dropdownOpen} toggle={toggleDropdown}>
-            <DropdownToggle nav caret>
-              Dropdown
-            </DropdownToggle>
-            <DropdownMenu>
-              <DropdownItem>Action</DropdownItem>
-              <DropdownItem>Another action</DropdownItem>
-              <DropdownItem>Something else here</DropdownItem>
-            </DropdownMenu>
-          </Dropdown> */}
         </Nav>
       </Collapse>
     </Navbar>
