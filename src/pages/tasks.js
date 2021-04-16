@@ -86,9 +86,18 @@ export default function Tasks() {
       selector: "model",
       maxWidth: "300px", // when using custom you should use width or maxWidth, otherwise, the table will default to flex grow behavior
       cell: (row) => {
-        let model_path = row.model || 'https://www.google.com'
+        let model_path = row.model || '/'
+        return (<span>{model_path}</span>)
+      },
+    },
+    {
+      name: "Get Predictions",
+      selector: "prediction",
+      maxWidth: "300px", // when using custom you should use width or maxWidth, otherwise, the table will default to flex grow behavior
+      cell: (row) => {
+        let model_path = `prediction/${row.id}` || '#'
         return (<a href={model_path} target="_blank" rel="noopener noreferrer">
-          Download
+          Predict
         </a>)
       },
     },
