@@ -40,10 +40,10 @@ export default function NavigationBar() {
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink active={(location.pathname === '/tasks') ? true:false} href="/tasks">Tasks</NavLink>
+            <NavLink active={(location.pathname === '/tasks') ? true:false} style={{fontWeight: (location.pathname === '/tasks') ? "500":"400"}} href="/tasks">Tasks</NavLink>
           </NavItem>
           <NavItem>
-            <NavLink active={(location.pathname === '/retrain') ? true:false} href="/retrain">Retrain</NavLink>
+            <NavLink active={(location.pathname === '/retrain') ? true:false} style={{fontWeight: (location.pathname === '/retrain') ? "500":"400"}} href="/retrain">Retrain</NavLink>
           </NavItem>
           {logged ? (
             <NavItem>

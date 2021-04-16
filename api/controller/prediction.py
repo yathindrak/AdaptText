@@ -67,7 +67,7 @@ def predict(task_id, text):
     learn_classifier_bwd = load_learner(classifier_dir, classifiers_store_path[1] + str(get_task.id) + ".pkl")
     learn_classifier_ensemble = load_learner(classifier_dir, classifiers_store_path[2] + str(get_task.id) + ".pkl")
 
-    predictor = Predictor(learn_classifier_fwd, learn_classifier_bwd, learn_classifier_ensemble, meta_info.__classes)
+    predictor = Predictor(learn_classifier_fwd, learn_classifier_bwd, learn_classifier_ensemble, meta_info.classes)
 
     prediction = predictor.predict(text)
 
