@@ -23,12 +23,18 @@ class EnsembleTrainer(Trainer):
         pred_tensors_fwd, pred_tensors_target_fwd = self.__learn_clas_fwd.get_preds(DatasetType.Valid, ordered=True)
         pred_tensors_bwd, pred_tensors_target_bwd = self.__learn_clas_bwd.get_preds(DatasetType.Valid, ordered=True)
 
-        xyz = pd.DataFrame(pred_tensors_fwd.numpy())
-        for idx,item in self.__classes:
-            xyz.rename(columns={idx: item}, inplace=True)
+        fwd_df = pd.DataFrame(pred_tensors_fwd.numpy())
+        print('--classes--')
+        print(len(self.__classes))
+        for idx in range(len(self.__classes)):
+            fwd_df.rename(columns={idx: self.__classes[idx]}, inplace=True)
 
-        preds_fwd = pd.DataFrame(pred_tensors_fwd.numpy()).add_prefix('fwd_')
-        preds_textm_bwd = pd.DataFrame(pred_tensors_bwd.numpy()).add_prefix('bwd_')
+        bwd_df = pd.DataFrame(pred_tensors_bwd.numpy())
+        for idx in range(len(self.__classes)):
+            bwd_df.rename(columns={idx: self.__classes[idx]}, inplace=True)
+
+        preds_fwd = fwd_df.add_prefix('fwd_')
+        preds_textm_bwd = bwd_df.add_prefix('bwd_')
         preds_target_fwd = pd.DataFrame(pred_tensors_target_fwd.numpy())
 
         ensemble_df = (preds_fwd
