@@ -52,7 +52,13 @@ export default function Tasks() {
       selector: "name",
       sortable: true,
       maxWidth: "300px", // when using custom you should use width or maxWidth, otherwise, the table will default to flex grow behavior
-      cell: (row) => <p style={{margin: 0}}>{row.name}</p>,
+      cell: (row) => {
+      let model_path = `task/${row.id}` || '#'
+        return (<a href={model_path} target="_blank" rel="noopener noreferrer">
+          {row.name}
+        </a>)
+      },
+      
     },
     {
       name: "Description",
