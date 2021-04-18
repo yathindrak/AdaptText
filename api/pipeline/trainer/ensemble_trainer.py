@@ -24,8 +24,6 @@ class EnsembleTrainer(Trainer):
         pred_tensors_bwd, pred_tensors_target_bwd = self.__learn_clas_bwd.get_preds(DatasetType.Valid, ordered=True)
 
         fwd_df = pd.DataFrame(pred_tensors_fwd.numpy())
-        print('--classes--')
-        print(len(self.__classes))
         for idx in range(len(self.__classes)):
             fwd_df.rename(columns={idx: self.__classes[idx]}, inplace=True)
 
