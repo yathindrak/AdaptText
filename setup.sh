@@ -38,16 +38,7 @@ apt install -y python3-pip
 apt-get install -y python3-venv
 install --upgrade pip
 apt-get install git
-
-wget https://nginx.org/keys/nginx_signing.key
-apt-key add nginx_signing.key
-
-echo "deb https://nginx.org/packages/mainline/ubuntu/ bionic nginx" | sudo tee -a /etc/apt/sources.list
-echo "deb https://nginx.org/packages/mainline/ubuntu/ bionic nginx" | sudo tee -a /etc/apt/sources.list
-
-sudo apt-get update
-
-apt install -y nginx
+apt-get install nginx=1.15.0-1~bionic -y
 apt install -y libmysqlclient-dev
 DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=5557f6a687102089b482b46479d702d9 DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
 #
