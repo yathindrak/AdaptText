@@ -9,20 +9,20 @@ import copy
 
 
 class ClassifierTrainer(Trainer):
+    """Trainer for Classifier"""
     def __init__(self, data, classifiers_store_path, task_id, is_backward=False, drop_mult=0.5, *args, **kwargs):
         super(ClassifierTrainer, self).__init__(*args, **kwargs)
         self.__data = data
-        # self.lm_fns = lm_fns
-        # self.mdl_path = mdl_path
-        # self.model_store_path = model_store_path
         self.__classifiers_store_path = classifiers_store_path
         self.__task_id = task_id
         self.__is_backward = is_backward
         self.__drop_mult = drop_mult
-        # self.lang = lang
-        # super().__init__(self)
 
     def retrieve_classifier(self) -> 'TextClassifierLearner':
+        """
+        Setup and Retrieve Classification model
+        :rtype: object
+        """
         databunch = self.__data
         dropout_probs = dict(input=0.25, output=0.1, hidden=0.15, embedding=0.02, weight=0.2)
         size_of_embedding = 400
@@ -61,6 +61,10 @@ class ClassifierTrainer(Trainer):
         return learn
 
     def train(self, grad_unfreeze=True):
+        """
+        Train Classification model
+        :rtype: object
+        """
         learn = self.retrieve_classifier()
 
         optar = partial(DiffGrad, betas=(.91, .999), eps=1e-7)

@@ -2,12 +2,13 @@ from ..fastai1.basics import *
 import emoji
 
 class WikiHandler:
+    """Handle Wikipedia articles"""
     def __init__(self, lang='si'):
         self.__lang = lang
         self.__lang_code = f'{lang}wiki'
 
-    # Get wiki articles
     def retrieve_articles(self, path):
+        """Get wiki articles"""
         if (path / self.__lang_code).exists():
             print(f"{path / self.__lang_code} wiki-data already exists...")
             return
@@ -35,6 +36,10 @@ class WikiHandler:
         shutil.rmtree(path / 'text')
 
     def prepare_articles(self, path):
+        """
+        Prepare wiki articles to be loaded by the databunch loader
+        :rtype: str
+        """
         base_lm_data_path = path / 'articles'
         if base_lm_data_path.exists():
             print(f"{base_lm_data_path} articles already exists")

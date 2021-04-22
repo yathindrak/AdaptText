@@ -2,10 +2,18 @@ from filestack import Client
 
 
 class ImageStorage:
+    """Manage images"""
     def __init__(self):
         self.__client = Client("A2BIWbSEXSUKDLgjKn6fgz")
 
     def upload(self, img_path):
+        """
+        Upload image to FileStack
+        :param img_path: image path
+        :type img_path: str
+        :return: hosted url
+        :rtype: str
+        """
         store_params = {
             "mimetype": "image/png"
         }

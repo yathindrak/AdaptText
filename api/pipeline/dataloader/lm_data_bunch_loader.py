@@ -4,6 +4,7 @@ from .data_bunch_loader import DataBunchLoader
 
 
 class LMDataBunchLoader(DataBunchLoader):
+    """Provide Databunch for Language Model"""
     def __init__(self, df_train_set, df_val_set, text_col_name, label_col_name, app_root,
                  continuous_train=False, is_backward=False, *args, **kwargs):
         super(LMDataBunchLoader, self).__init__(*args, **kwargs)
@@ -18,6 +19,10 @@ class LMDataBunchLoader(DataBunchLoader):
         # self.__lang = lang
 
     def load(self):
+        """
+        Returns databunch for Language Model
+        :rtype: object
+        """
         if self.__continuous_train:
             dropbox_handler = DropboxHandler(self.__app_root)
             dropbox_handler.upload_text_file(self.__df_train_set[self.__text_col_name])
@@ -29,8 +34,6 @@ class LMDataBunchLoader(DataBunchLoader):
 
         if self.__is_backward:
             data.save(f'{self._lang}_data_lm_bwd.pkl')
-            # data = load_data('./', f'{lang}_data_lm_bwd.pkl')
         else:
             data.save(f'{self._lang}_data_lm_fwd.pkl')
-            # data = load_data('./', f'{lang}_data_lm_fwd.pkl')
         return data

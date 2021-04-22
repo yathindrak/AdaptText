@@ -7,18 +7,21 @@ from ..optimizer.DiffGradOptimizer import DiffGrad
 
 
 class LMTrainer(Trainer):
+    """Trainer for LM"""
     def __init__(self, data, lm_fns, mdl_path, is_backward=False, drop_mult=0.9, is_gpu=True, *args, **kwargs):
         super(LMTrainer, self).__init__(*args, **kwargs)
         self.__data = data
         self.__lm_fns = lm_fns
         self.__mdl_path = mdl_path
-        # self.model_store_path = model_store_path
         self.__is_backward = is_backward
         self.__drop_mult = drop_mult
         self.__is_gpu = is_gpu
-        # super().__init__(self)
 
     def retrieve_lm(self, pretrained_paths: OptStrTuple = None) -> 'LanguageLearner':
+        """
+        Setup and Retrieve Language model
+        :rtype: object
+        """
         databunch = self.__data
         dropout_probs = dict(input=0.25, output=0.1, hidden=0.15, embedding=0.02, weight=0.2)
         size_of_embedding = 400
@@ -59,6 +62,10 @@ class LMTrainer(Trainer):
         return learn
 
     def train(self):
+        """
+        Train the Language model
+        :rtype: object
+        """
         lm_fn_1_fwd = self.__mdl_path / f'{self._lang}_wt.pth'
         lm_fn_1_bwd = self.__mdl_path / f'{self._lang}_wt_bwd.pth'
 
@@ -90,20 +97,8 @@ class LMTrainer(Trainer):
         learn.predict("මේ අතර", n_words=30)
 
         if self.__is_backward:
-            # comment below 2 lines of code out to avoid overriding base lm: cause errors otherwise
-            # learn.to_fp32().save(self.mdl_path  / self.lm_fns[0], with_opt=False)
-            # learn.data.vocab.save(self.model_store_path)
-
-            # learn.data.vocab.save('/content/data/siwiki/models/si_wt_vocab_bwd.pkl')
-
             learn.save(f'{self._lang}fine_tuned_bwd')
             learn.save_encoder(f'{self._lang}fine_tuned_enc_bwd')
         else:
-            # comment below 2 lines of code out to avoid overriding base lm: cause errors otherwise
-            # learn.to_fp32().save(self.mdl_path / self.lm_fns[0], with_opt=False)
-            # learn.data.vocab.save(self.model_store_path)
-
-            # learn.data.vocab.save('/content/data/siwiki/models/si_wt_vocab.pkl')
-
             learn.save(f'{self._lang}fine_tuned')
             learn.save_encoder(f'{self._lang}fine_tuned_enc')

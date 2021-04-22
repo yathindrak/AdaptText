@@ -6,6 +6,10 @@ auth_controller = Blueprint('auth', __name__)
 
 @auth_controller.route('/login', methods=['POST'])
 def login():
+    """
+    Login the user
+    :rtype: object
+    """
     json_obj = request.get_json()
     if not json_obj:
         return make_response(jsonify({'error': 'Bad Request', 'message': 'No credentials provided', 'status_code': 400}), 400)
@@ -30,6 +34,10 @@ def login():
 
 @auth_controller.route('/refresh', methods=['POST'])
 def refresh():
+    """
+    Refresh token
+    :rtype: object
+    """
     json_data = request.get_json()
 
     if not json_data:

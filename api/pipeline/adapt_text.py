@@ -20,6 +20,7 @@ from .utils.wiki_handler import WikiHandler
 
 
 class AdaptText:
+    """Bootstrapper for AdaptText"""
     def __init__(self, lang, data_root, bs=128, splitting_ratio=0.1, continuous_train=True):
         self.__lang = lang
         self.__data_root = data_root
@@ -49,6 +50,10 @@ class AdaptText:
             self.is_gpu = True
 
     def setup_wiki_data(self):
+        """
+        Setup required wikipedia data
+        :rtype: str
+        """
         logger = Logger()
         # making required directories
         self.__path.mkdir(exist_ok=True, parents=True)
@@ -66,6 +71,9 @@ class AdaptText:
         return base_lm_data_path
 
     def add_external_text(self, txt_filename, filepath, url):
+        """
+        Setup data via continuous learning flow
+        """
         headers = {'user-agent': 'Wget/1.16 (linux-gnu)'}
         r = requests.get(url, stream=True, headers=headers)
         with open(filepath, 'wb') as f:
@@ -80,10 +88,6 @@ class AdaptText:
 
     def prepare_base_lm_corpus(self):
         self.setup_wiki_data()
-        # txt_filename = "test-s.txt"
-        # filepath = Path(self.data_root + "/test-s.zip")
-        # url = "https://www.dropbox.com/s/cnd985vl1bof50y/test-s.zip?dl=0"
-
         txt_filename = "half-si-dedup.txt"
         filepath = Path(self.__data_root + "/half-si-dedup.zip")
         url = "https://www.dropbox.com/s/alh6jf4rqxhhzow/half-si-dedup.zip?dl=0"
@@ -94,7 +98,9 @@ class AdaptText:
         dropbox_handler.download_articles()
 
     def prepare_pretrained_lm(self, model_file_name):
-        # models-test-s-10-epochs-with-cls.zip
+        """
+        Setup pretrained model
+        """
         if (Path(f'{os.getcwd()}{self.__data_root}').exists()):
             shutil.rmtree(f'{os.getcwd()}{self.__data_root}')
         dropbox_handler = DropboxHandler(self.__data_root)
@@ -119,8 +125,9 @@ class AdaptText:
             shutil.move(source, self.__mdl_path)
 
     def build_base_lm(self):
-        # if (not Path(self.base_lm_data_path).exists()):
-        #     print("Base LM corpus not found, preparing the corpus...")
+        """
+        Build and Base Language Model
+        """
         self.prepare_base_lm_corpus()
         logger = Logger()
 
@@ -156,16 +163,21 @@ class AdaptText:
         logger.info('Trained backward BaseLM...')
 
     def update_progress(self, task_id, progress):
+        """
+        Update training progress in DB
+        """
         database.session.query(Task).filter_by(id=task_id).update({"progress": progress})
         database.session.commit()
 
     def build_classifier(self, df, text_name, label_name, task_id, grad_unfreeze: bool = True):
+        """
+        Build and Classification Model
+        """
         logger = Logger()
         if (not Path(self.__mdl_path).exists()):
             logger.info('Pretrained LM not found, preparing...')
 
             # below the classifier hardcode wont be there for library
-            # self.prepare_pretrained_lm("one-outta-three.zip")
             self.prepare_pretrained_lm("half_si_dedup.zip")
 
         df = df[[text_name, label_name]]
@@ -174,15 +186,10 @@ class AdaptText:
         if not Path(func_names[0]).exists():
             return
 
-        # custom_model_store_path = self.mdl_path / Path(f'{self.lang}_lm_wt_vocab.pkl')
-        # custom_model_store_path_bwd = self.mdl_path / Path(f'{self.lang}_lm_wt_vocab_bwd.pkl')
-
         preprocessor = PreProcessor(df, text_name)
         preprocessor.preprocess_text()
 
         logger.info('Done preprocessing...')
-
-        # item_counts = df[label_name].value_counts()
 
         df[label_name].value_counts().plot.bar(rot=30)
 
@@ -216,8 +223,6 @@ class AdaptText:
         classificationDataBunchLoader = ClassificationDataBunchLoader(df_trn, df_val, text_name, label_name, vocab)
         data_class = classificationDataBunchLoader.load()
 
-        # data_class.show_batch()
-
         web_socket = PusherPublisher()
         web_socket.publish_classifier_progress(task_id, 11)
         self.update_progress(task_id, 11)
@@ -225,8 +230,6 @@ class AdaptText:
         classificationDataBunchLoaderBwd = ClassificationDataBunchLoader(df_trn, df_val, text_name, label_name,
                                                                          vocab, is_backward=True)
         data_class_bwd = classificationDataBunchLoaderBwd.load()
-
-        # data_class_bwd.show_batch()
 
         classes = data_class.classes
 
@@ -292,7 +295,9 @@ class AdaptText:
         return classifierModelFWD, classifierModelBWD, ensembleModel, classes
 
     def store_lm(self, zip_file_name):
-        # zip_file_name = "test.zip"
+        """
+        Store Base Language Model
+        """
         zip_archive = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
         for item in self.__lm_store_path:
             zip_archive.write(item)
@@ -300,19 +305,3 @@ class AdaptText:
 
         dropbox_handler = DropboxHandler(self.__data_root)
         dropbox_handler.upload_zip_file(zip_file_name, f'/adapttext/models/{zip_file_name}')
-
-    # def download_classifier(self, zip_file_name):
-    #     # zip_file_name = "test.zip"
-    #     zip_archive = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
-    #     for item in self.classifiers_store_path:
-    #         pkl_name = item + task_id + ".pkl"
-    #         zip_archive.write(pkl_name)
-    #     zip_archive.close()
-
-    # response = make_response(zip_file_name.read())
-    # response.headers.set('Content-Type', 'zip')
-    # response.headers.set('Content-Disposition', 'attachment', filename='%s.zip' % os.path.basename(FILEPATH))
-    # return response
-
-    # dropbox_handler = DropboxHandler(self.data_root)
-    # dropbox_handler.upload_zip_file(zip_file_name, f'/adapttext/models/{zip_file_name}')

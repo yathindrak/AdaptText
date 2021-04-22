@@ -3,6 +3,7 @@ import emoji
 
 
 class PreProcessor:
+    """Preprocessing module"""
     def __init__(self, df, text_name):
         self.__df = df
         self.__text_name = text_name
@@ -21,4 +22,4 @@ class PreProcessor:
         self.__df.dropna()
         self.__df[self.__text_name] = self.__df[self.__text_name].apply(self.remove_stop_words)
         self.__df[self.__text_name] = self.__df[self.__text_name].apply(self.demojize_text)
-        return self.__df
+

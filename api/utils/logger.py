@@ -3,6 +3,7 @@ import json_log_formatter
 
 
 class Logger:
+    """Logging Module"""
     def __init__(self):
         formatter = json_log_formatter.JSONFormatter()
         logging.basicConfig(
@@ -15,6 +16,9 @@ class Logger:
         self.logger.setLevel(logging.INFO)
 
     def info(self, message):
+        """
+        Log info level logs
+        """
         self.logger.info(message,
                          extra={
                              'logger.name': 'adapttext',

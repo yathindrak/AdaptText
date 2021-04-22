@@ -165,7 +165,7 @@ def execute(id):
     # accuracy, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, \
     # weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url\
     #
-    metrics_dict = evaluator.evaluate_ensemble(learn_ensemble)
+    metrics_dict = evaluator.evaluate(learn_ensemble)
 
     web_socket.publish_classifier_progress(id, 96)
     update_progress(id, 96)
@@ -251,18 +251,14 @@ def retrain_base_lm():
     return make_response('', 204)
 
 
-# @task_controller.route('/task/user/<uid>')
-# @auth_required
-# def get_by_username(uid):
-#     get_tasks = Task.query.filter_by(user_id=uid).all()
-#     task_schema = TaskSchema(many=True)
-#     tasks = task_schema.dump(get_tasks)
-#     return make_response(jsonify({"task": tasks}), 200)
-
-
 @task_controller.route('/tasks')
 @auth_required
 def get_all():
+    """
+    Get all tasks for a particular user
+    :return: list of tasks
+    :rtype: list
+    """
     current_user = flask_praetorian.current_user().id
 
     get_tasks = Task.query.filter_by(user_id=current_user).all()
@@ -272,37 +268,3 @@ def get_all():
 
     return make_response(jsonify({"tasks": tasks}), 200)
 
-
-# @task_controller.route('/task/<id>', methods=['PUT'])
-# @auth_required
-# def update_by_id(id):
-#     data = request.get_json()
-#     get_task = Task.query.get(id)
-#
-#     progress = data.get('progress')
-#     model_path = data.get('model_path')
-#
-#     if progress and model_path:
-#         database.session.query(Task).filter_by(id=id).update({"progress": progress, "model_path": model_path})
-#     elif progress:
-#         database.session.query(Task).filter_by(id=id).update({"progress": progress})
-#     elif model_path:
-#         database.session.query(Task).filter_by(id=id).update({"model_path": model_path})
-#
-#     database.session.commit()
-#
-#     task_schema = TaskSchema()
-#     task = task_schema.dump(get_task)
-#     return make_response(jsonify({"task": task}))
-
-# @task_routes.route('/plot_roc/<id>')
-# def plot_roc(id):
-#     meta_info = MetaInfo.query.filter_by(task_id=id).first()
-#
-#     evaluator = Evaluator()
-#     roc_figure = evaluator.draw_roc_curve(meta_info.xlim, meta_info.ylim, meta_info.fpr, meta_info.tpr, meta_info.roc_auc)
-#     bytes = BytesIO()
-#     plt.savefig(bytes, dpi=roc_figure.dpi)
-#     bytes.seek(0)
-#
-#     return send_file(bytes, mimetype='image/png')

@@ -7,6 +7,7 @@ from ..optimizer.DiffGradOptimizer import DiffGrad
 
 
 class BaseLMTrainer(Trainer):
+    """Trainer for Base LM"""
     def __init__(self, data, lm_fns, mdl_path, model_store_path, is_gpu=True, drop_mult=0.9, *args, **kwargs):
         super(BaseLMTrainer, self).__init__(*args, **kwargs)
         self.__data = data
@@ -14,11 +15,13 @@ class BaseLMTrainer(Trainer):
         self.__mdl_path = mdl_path
         self.__model_store_path = model_store_path
         self.__drop_mult = drop_mult
-        # self.lang = lang
         self.__is_gpu = is_gpu
-        # super().__init__(self)
 
     def retrieve_lm(self, pretrained_paths: OptStrTuple = None) -> 'LanguageLearner':
+        """
+        Setup and Retrieve Language model
+        :rtype: object
+        """
         databunch = self.__data
         dropout_probs = dict(input=0.25, output=0.1, hidden=0.15, embedding=0.02, weight=0.2)
         size_of_embedding = 400
@@ -60,6 +63,10 @@ class BaseLMTrainer(Trainer):
         return learn
 
     def train(self):
+        """
+        Train the language model
+        :rtype: object
+        """
         if self.__is_gpu:
             learn = self.retrieve_lm().to_fp16()
         else:

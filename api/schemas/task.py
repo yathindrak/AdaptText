@@ -6,6 +6,7 @@ from ..models.task import Task
 
 class TaskSchema(ModelSchema):
     class Meta(ModelSchema.Meta):
+        """Manage a Task"""
         fields = ('id', 'name', 'description', 'progress', 'model_path', 'date_created', 'user_id',
                   'meta_data.ds_path', 'meta_data.ds_text_col', 'meta_data.ds_label_col', 'meta_data.classes',
                   'meta_data.accuracy',

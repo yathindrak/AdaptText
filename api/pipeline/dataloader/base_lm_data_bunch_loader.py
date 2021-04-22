@@ -4,17 +4,18 @@ from .data_bunch_loader import DataBunchLoader
 
 
 class BaseLMDataBunchLoader(DataBunchLoader):
+    """Provide Databunch for Base Language Model"""
     def __init__(self, path, splitting_ratio, is_backward=False, *args, **kwargs):
         super(BaseLMDataBunchLoader, self).__init__(*args, **kwargs)
         self.__path = path
         self.__splitting_ratio = splitting_ratio
-        # self.__seed = seed
-        # self.__bs = bs
         self.__is_backward = is_backward
-        # self.__lang = lang
-        # super().__init__(self)
 
     def load(self):
+        """
+        Returns databunch for Base Language Model
+        :rtype: object
+        """
         tokenizer = Tokenizer(SpacyTokenizer, lang="xx")
         data = (TextList.from_folder(Path(self.__path),
                                      processor=[OpenFileProcessor(), TokenizeProcessor(tokenizer=tokenizer),

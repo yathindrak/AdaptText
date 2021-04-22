@@ -3,6 +3,7 @@ from .data_bunch_loader import DataBunchLoader
 
 
 class ClassificationDataBunchLoader(DataBunchLoader):
+    """Provide Databunch for Classification Model"""
     def __init__(self, df_train_set, df_val_set, text_col_name, label_col_name, vocab, is_backward=False, *args, **kwargs):
         super(ClassificationDataBunchLoader, self).__init__(*args, **kwargs)
         self.__df_train_set = df_train_set
@@ -15,6 +16,10 @@ class ClassificationDataBunchLoader(DataBunchLoader):
         # self.__lang = lang
 
     def load(self):
+        """
+        Returns databunch for Classification Model
+        :rtype: object
+        """
         item_counts = self.__df_train_set[self.__label_col_name].value_counts()
         print(item_counts)
         self.__df_train_set[self.__label_col_name].value_counts().plot.bar(rot=30)

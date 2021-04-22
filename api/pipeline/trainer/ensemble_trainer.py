@@ -7,6 +7,7 @@ from ..fastai1.tabular import *
 
 
 class EnsembleTrainer(Trainer):
+    """Trainer for Ensemble Classification Model"""
     def __init__(self, learn_clas_fwd, learn_clas_bwd, classes, classifiers_store_path, task_id, *args, **kwargs):
         super(EnsembleTrainer, self).__init__(*args, **kwargs)
         self.__learn_clas_fwd = learn_clas_fwd
@@ -14,11 +15,12 @@ class EnsembleTrainer(Trainer):
         self.__classifiers_store_path = classifiers_store_path
         self.__task_id = task_id
         self.__classes = classes
-        # self.drop_mult = drop_mult
-        # self.lang = lang
-        # super().__init__(self)
 
     def retrieve_classifier(self):
+        """
+        Setup and Retrieve Ensemble Classification model
+        :rtype: object
+        """
         metrics = [error_rate, accuracy]
         pred_tensors_fwd, pred_tensors_target_fwd = self.__learn_clas_fwd.get_preds(DatasetType.Valid, ordered=True)
         pred_tensors_bwd, pred_tensors_target_bwd = self.__learn_clas_bwd.get_preds(DatasetType.Valid, ordered=True)
@@ -58,6 +60,10 @@ class EnsembleTrainer(Trainer):
         return learn
 
     def train(self):
+        """
+        Train the Ensemble Classification model
+        :rtype: object
+        """
         learn = self.retrieve_classifier()
 
         optar = partial(DiffGrad, betas=(.91, .999), eps=1e-7)

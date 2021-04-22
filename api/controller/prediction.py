@@ -18,6 +18,10 @@ prediction_controller = Blueprint('prediction', __name__)
 @prediction_controller.route('/prediction/<id>')
 @auth_required
 def load_classifier(id):
+    """
+    Load classifier
+    :type id: object
+    """
     get_task = Task.query.get(id)
 
     current_user = User.lookup(flask_praetorian.current_user().username)
@@ -50,6 +54,10 @@ def load_classifier(id):
 @prediction_controller.route('/predict/<task_id>/<text>')
 @auth_required
 def predict(task_id, text):
+    """
+    Inferencing for the loaded model
+    :type id: object
+    """
     get_task = Task.query.get(task_id)
 
     current_user = User.lookup(flask_praetorian.current_user().username)

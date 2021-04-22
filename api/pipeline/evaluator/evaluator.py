@@ -6,11 +6,18 @@ from ..fastai1.basics import *
 from sklearn.metrics import classification_report, matthews_corrcoef
 from sklearn.metrics import roc_curve, auc
 
+
 class Evaluator():
+    """Provide evaluation metrics"""
+
     def __init__(self):
         pass
 
-    def evaluate_ensemble(self, learn):
+    def evaluate(self, learn):
+        """
+        Evaluate the ensemble model
+        :rtype: dict
+        """
         logger = Logger()
         preds, y, losses = learn.get_preds(with_loss=True)
 
@@ -33,7 +40,7 @@ class Evaluator():
         ylim = [0.0, 1.01]
 
         roc_curve_fig = self.draw_roc_curve(xlim, ylim, fpr, tpr, roc_auc)
-        roc_curve_fig_path = 'roc_curve_'+str(uuid.uuid4())+'.png'
+        roc_curve_fig_path = 'roc_curve_' + str(uuid.uuid4()) + '.png'
         roc_curve_fig.savefig(roc_curve_fig_path)
 
         # use learn_clas_fwd for the ensemble to get close confusion matrix for the actual
@@ -68,7 +75,8 @@ class Evaluator():
 
         logger.info('Evaluation completed')
 
-        metrics_dict = {'acc': acc.item(), 'err': err.item(), 'xlim': xlim, 'ylim': ylim, 'fpr': fpr.tolist(), 'tpr': tpr.tolist(), 'roc_auc': roc_auc.item(),
+        metrics_dict = {'acc': acc.item(), 'err': err.item(), 'xlim': xlim, 'ylim': ylim, 'fpr': fpr.tolist(),
+                        'tpr': tpr.tolist(), 'roc_auc': roc_auc.item(),
                         'macro_f1': macro_f1, 'macro_precision': macro_precision, 'macro_recall': macro_recall,
                         'macro_support': macro_support, 'weighted_f1': weighted_f1,
                         'weighted_precision': weighted_precision, 'weighted_recall': weighted_recall,
@@ -77,54 +85,22 @@ class Evaluator():
 
         return metrics_dict
 
-    # def evaluate(self, learn):
-    #     preds, y, losses = learn.get_preds(with_loss=True)
-    #
-    #     acc = accuracy(preds, y)
-    #     print('The accuracy is {0} %.'.format(acc))
-    #
-    #     err = error_rate(preds, y)
-    #     print('The error rate is {0} %.'.format(err))
-    #
-    #     interp = ClassificationInterpretation(learn, preds, y, losses, return_fig=True)
-    #     interp.plot_confusion_matrix()
-    #
-    #     pred_val = learn.get_preds(DatasetType.Valid, ordered=True)
-    #     pred_val_l = pred_val[0].argmax(1)
-    #
-    #     print(classification_report(pred_val[1], pred_val_l))
-    #
-    #     # probs from log preds
-    #     probs = np.exp(preds[:, 1])
-    #     # Compute ROC curve
-    #     fpr, tpr, thresholds = roc_curve(y, probs, pos_label=1)
-    #
-    #     # Compute ROC area
-    #     roc_auc = auc(fpr, tpr)
-    #     print('ROC area is {0}'.format(roc_auc))
-    #
-    #     xlim = [-0.01, 1.0]
-    #     ylim = [0.0, 1.01]
-    #
-    #     plt.figure()
-    #     plt.plot(fpr, tpr, color='darkorange', label='ROC curve (area = %0.2f)' % roc_auc)
-    #     plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
-    #     plt.xlim(xlim)
-    #     plt.ylim(ylim)
-    #     plt.xlabel('False Positive Rate')
-    #     plt.ylabel('True Positive Rate')
-    #     plt.title('Receiver operating characteristic')
-    #     plt.legend(loc="lower right")
-    #
-    #     interp2 = TextClassificationInterpretation.from_learner(learn)
-    #     interp2.show_top_losses(10)
-    #
-    #     # print(interp2.show_intrinsic_attention(
-    #     #     "ඉඩකඩ සම්බන්ධයෙන් මතු වූ ගැටලුව මහර බන්ධනාගාරයේ කලහකාරී තත්ත්වයට එකහෙළා බලපෑ බව, සිද්ධිය පිළිබඳව විමර්ශනය කිරීම සඳහා අධිකරණ අමාත්‍යවරයා පත්කළ කමිටුවේ අතුරු වාර්තාව පෙන්වා දී තිබේ."))
-    #
-    #     torch.argmax(preds[0])
-
     def draw_roc_curve(self, xlim, ylim, fpr, tpr, roc_auc):
+        """
+        Draw ROC Curve
+        :param xlim: x axis limits
+        :type xlim: list
+        :param ylim: y axis limits
+        :type ylim: list
+        :param fpr: false positive rate
+        :type fpr: float
+        :param tpr: true positive rate
+        :type tpr: float
+        :param roc_auc: Area under the curve
+        :type roc_auc: float
+        :return: figure
+        :rtype: object
+        """
         fig = plt.figure()
         plt.plot(fpr, tpr, color='darkorange', label='Ensemble Classifier : ROC curve (area = %0.2f)' % roc_auc)
         plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
@@ -138,6 +114,13 @@ class Evaluator():
         return fig
 
     def get_accuracy(self, learn):
+        """
+        Get model accuracy
+        :param learn: model
+        :type learn: object
+        :return: accuracy
+        :rtype: float
+        """
         logger = Logger()
         preds, y, losses = learn.get_preds(with_loss=True)
 
@@ -145,5 +128,3 @@ class Evaluator():
         logger.info('The accuracy is {0} %.'.format(acc))
 
         return acc
-
-
