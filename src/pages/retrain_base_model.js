@@ -26,7 +26,11 @@ export default function Retrain() {
         }
         return response.json();
       })
-      .then((response) => {});
+      .then((response) => {
+        if(response) {
+          setIsInProgress(true);
+        }
+      });
 
     const pusher = new Pusher("33b4f28f7e51e14cc56f", {
       cluster: "ap1",

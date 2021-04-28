@@ -124,7 +124,6 @@ def execute(id):
 
     meta_info = MetaInfo.query.filter_by(task_id=id).first()
     model_path = None
-    # current_user = User.lookup(flask_praetorian.current_user().username)
 
     logger = Logger()
     logger.info('Start execution of the task ' + str(id))
@@ -162,9 +161,7 @@ def execute(id):
     evaluator = Evaluator()
 
     logger.info('Ensemble classifier analysis')
-    # accuracy, err, xlim, ylim, fpr, tpr, roc_auc, macro_f1, macro_precision, macro_recall, macro_support, \
-    # weighted_f1, weighted_precision, weighted_recall, weighted_support, matthews_corr_coef, conf_matrix_fig_url, roc_curve_fig_url\
-    #
+
     metrics_dict = evaluator.evaluate(learn_ensemble)
 
     web_socket.publish_classifier_progress(id, 96)
@@ -174,7 +171,6 @@ def execute(id):
 
     try:
         meta_info = MetaInfo.query.filter_by(task_id=id).first()
-        # setattr(meta_info, 'ds_path', 'aassdaasd')
         setattr(meta_info, 'accuracy', metrics_dict['acc'])
         setattr(meta_info, 'err', metrics_dict['err'])
         setattr(meta_info, 'classes', classes)
