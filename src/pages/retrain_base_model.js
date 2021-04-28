@@ -36,6 +36,7 @@ export default function Retrain() {
 
     const channel = pusher.subscribe("upload");
     channel.bind("progress-lm", (data) => {
+      console.log(data)
       if (data.percentage < 100) {
         setIsInProgress(true);
         setProgress(data.percentage);
