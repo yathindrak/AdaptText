@@ -25,8 +25,6 @@ class WikiHandler:
             print("unzipping articles archive...")
             bunzip(path / zip_path)
 
-        os.chdir('/var/adapttext/api/')
-
         # change working dir to 'path'
         with working_directory(path):
             print("extracting wiki articles...")
