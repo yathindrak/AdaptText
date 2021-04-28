@@ -234,14 +234,15 @@ def retrain_base_lm():
     app_root = "/storage"
     bs = 128
     splitting_ratio = 0.1
-    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio)
-
     web_socket = PusherPublisher()
     web_socket.publish_lm_progress(1)
+    
+    adapt_text = AdaptText(lang, app_root, bs, splitting_ratio)
+
+    web_socket.publish_lm_progress(3)
 
     adapt_text.build_base_lm()
 
-    web_socket = PusherPublisher()
     web_socket.publish_lm_progress(100)
 
     return make_response('', 204)
