@@ -9,7 +9,7 @@ import NavigationBar from "../components/navbar";
 export default function Retrain() {
   const [logged] = useAuth();
   const history = useHistory();
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(1);
   const [isInProgress, setIsInProgress] = useState(false);
 
   const retrainLM = (event) => {
