@@ -28,7 +28,7 @@ class WikiHandler:
         # change working dir to 'path'
         with working_directory(path):
             print("extracting wiki articles...")
-            wiki_extraction_cmd = "python -m wikiextractor.WikiExtractor --processes 4 --no_templates " + f"--min_text_length 1800 --filter_disambig_pages --log_file log -b 100G -q {xml_path}"
+            wiki_extraction_cmd = "/var/adapttext/api/env/bin/python -m wikiextractor.WikiExtractor --processes 4 --no_templates " + f"--min_text_length 1800 --filter_disambig_pages --log_file log -b 100G -q {xml_path}"
             os.system(wiki_extraction_cmd)
 
         # Perform directory cleanup
