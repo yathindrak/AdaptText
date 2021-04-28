@@ -32,8 +32,9 @@ class WikiHandler:
             os.system(wiki_extraction_cmd)
 
         # Perform directory cleanup
-        shutil.move(str(path / 'text/AA/wiki_00'), str(path / self.__lang_code))
-        shutil.rmtree(path / 'text')
+        if (path / 'text/AA/wiki_00').exists():
+            shutil.move(str(path / 'text/AA/wiki_00'), str(path / self.__lang_code))
+            shutil.rmtree(path / 'text')
 
     def prepare_articles(self, path):
         """
