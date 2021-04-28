@@ -80,7 +80,7 @@ class ClassifierTrainer(Trainer):
         tuner = HyperParameterTuner(learn)
         lr = tuner.find_optimized_lr()
 
-        learn.fit_one_cycle(12, lr, callbacks=[SaveModelCallback(learn), ReduceLROnPlateauCallback(learn, factor=0.8)])
+        learn.fit_one_cycle(12, lr, callbacks=[SaveModelCallback(learn), ReduceLROnPlateauCallback(learn)])
 
         # store model temporarily
         classifier_initial = copy.deepcopy(learn)
@@ -94,12 +94,12 @@ class ClassifierTrainer(Trainer):
             learn.freeze_to(-2)
             learn.fit_one_cycle(8, lr,
                                 callbacks=[SaveModelCallback(learn),
-                                           ReduceLROnPlateauCallback(learn, factor=0.8)])
+                                           ReduceLROnPlateauCallback(learn)])
 
             learn.freeze_to(-3)
             learn.fit_one_cycle(6, lr,
                                 callbacks=[SaveModelCallback(learn),
-                                           ReduceLROnPlateauCallback(learn, factor=0.8)])
+                                           ReduceLROnPlateauCallback(learn)])
 
         print('Completely Unfreezing..')
 
@@ -112,9 +112,9 @@ class ClassifierTrainer(Trainer):
             lr = lr_unfrozed
 
         learn.fit_one_cycle(6, lr, callbacks=[SaveModelCallback(learn),
-                                              ReduceLROnPlateauCallback(learn, factor=0.8)])
+                                              ReduceLROnPlateauCallback(learn)])
         learn.fit_one_cycle(6, lr / 2, callbacks=[SaveModelCallback(learn),
-                                                  ReduceLROnPlateauCallback(learn, factor=0.8)])
+                                                  ReduceLROnPlateauCallback(learn)])
 
         print('Completed Unfreezing..')
 

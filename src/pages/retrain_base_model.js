@@ -13,6 +13,7 @@ export default function Retrain() {
   const [isInProgress, setIsInProgress] = useState(false);
 
   const retrainLM = (event) => {
+    setIsInProgress(true);
     authFetch(`/api/retrain`, {
       method: "POST",
       headers: {
@@ -26,11 +27,7 @@ export default function Retrain() {
         }
         return response.json();
       })
-      .then((response) => {
-        if(response) {
-          setIsInProgress(true);
-        }
-      });
+      .then((response) => {});
 
     const pusher = new Pusher("33b4f28f7e51e14cc56f", {
       cluster: "ap1",
