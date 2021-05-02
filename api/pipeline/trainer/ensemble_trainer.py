@@ -66,6 +66,7 @@ class EnsembleTrainer(Trainer):
         """
         learn = self.retrieve_classifier()
 
+        # DiffGrad Optimization
         optar = partial(DiffGrad, betas=(.91, .999), eps=1e-7)
         learn.opt_func = optar
 
@@ -83,6 +84,7 @@ class EnsembleTrainer(Trainer):
                             callbacks=[SaveModelCallback(learn, every='improvement', monitor='accuracy'),
                                        ReduceLROnPlateauCallback(learn)])
 
+        # Save model
         pkl_name = self.__classifiers_store_path[2] + self.__task_id + ".pkl"
         learn.export(pkl_name)
 

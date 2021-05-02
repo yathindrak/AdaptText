@@ -80,6 +80,7 @@ class LMTrainer(Trainer):
             else:
                 learn = self.retrieve_lm()
 
+        # DiffGrad Optimization
         optar = partial(DiffGrad, betas=(.91, .999), eps=1e-7)
         learn.opt_func = optar
 
@@ -89,13 +90,14 @@ class LMTrainer(Trainer):
 
         learn.fit_one_cycle(2, lr, moms=(0.8, 0.7),
                             callbacks=[SaveModelCallback(learn), ReduceLROnPlateauCallback(learn)])
-
+        # Completely unfreezing
         learn.unfreeze()
         learn.fit_one_cycle(8, lr, moms=(0.8, 0.7),
                             callbacks=[SaveModelCallback(learn), ReduceLROnPlateauCallback(learn)])
 
         learn.predict("මේ අතර", n_words=30)
 
+        # Save checkpoints
         if self.__is_backward:
             learn.save(f'{self._lang}fine_tuned_bwd')
             learn.save_encoder(f'{self._lang}fine_tuned_enc_bwd')

@@ -26,6 +26,7 @@ def load_classifier(id):
 
     current_user = User.lookup(flask_praetorian.current_user().username)
 
+    # check if the user has authority to access the model
     if get_task.user_id != current_user.id:
         return make_response(
             jsonify({'error': 'Not found', 'message': 'Model not found', 'status_code': 404}), 404)
@@ -40,11 +41,12 @@ def load_classifier(id):
 
     print("classification model {} not found locally; try downloading...", model_file_name)
 
+    # Download classification models
     dropbox_handler = DropboxHandler(classifier_root)
     destination = classifier_root + model_file_name
     dropbox_handler.download_classifier_model(model_file_name, destination)
 
-    # unzip
+    # unzip downloaded zip
     with zipfile.ZipFile(destination, 'r') as archive:
         archive.extractall(classifier_root)
 
@@ -62,6 +64,7 @@ def predict(task_id, text):
 
     current_user = User.lookup(flask_praetorian.current_user().username)
 
+    # check if the user has authority to get prediction
     if get_task.user_id != current_user.id:
         return make_response(
             jsonify({'error': 'Not found', 'message': 'Model not found', 'status_code': 404}), 404)
@@ -71,12 +74,13 @@ def predict(task_id, text):
     classifier_dir = "/classification/models/"
     classifiers_store_path = ["fwd-export", "bwd-export", "ensemble-export"]
 
+    # Load forward backward and ensemble models
     learn_classifier_fwd = load_learner(classifier_dir, classifiers_store_path[0] + str(get_task.id) + ".pkl")
     learn_classifier_bwd = load_learner(classifier_dir, classifiers_store_path[1] + str(get_task.id) + ".pkl")
     learn_classifier_ensemble = load_learner(classifier_dir, classifiers_store_path[2] + str(get_task.id) + ".pkl")
 
+    # make prediction
     predictor = Predictor(learn_classifier_fwd, learn_classifier_bwd, learn_classifier_ensemble, meta_info.classes)
-
     prediction = predictor.predict(text)
 
     return jsonify({'predicted_label': prediction}), 200

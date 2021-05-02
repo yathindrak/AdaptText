@@ -20,16 +20,11 @@ def login():
     except:
         return make_response(jsonify({'error': 'Bad Request', 'message': 'No credentials provided', 'status_code': 400}), 400)
 
+    # authenticate and encode the user
     user = guard.authenticate(user_name, password)
     token = guard.encode_jwt_token(user)
 
     return jsonify({'access_token': token}), 200
-
-
-# @auth_controller.route('/protected')
-# @auth_required
-# def protected():
-#     return jsonify({'result': 'You are in a special area!'}), 200
 
 
 @auth_controller.route('/refresh', methods=['POST'])
@@ -49,5 +44,6 @@ def refresh():
         return make_response(
             jsonify({'error': 'Bad Request', 'message': 'Token not found', 'status_code': 400}), 400)
 
+    # refresh and return the token
     token = guard.refresh_jwt_token(prev_token)
     return jsonify({'access_token': token})

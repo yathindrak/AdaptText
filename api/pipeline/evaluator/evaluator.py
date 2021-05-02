@@ -43,10 +43,6 @@ class Evaluator():
         roc_curve_fig_path = 'roc_curve_' + str(uuid.uuid4()) + '.png'
         roc_curve_fig.savefig(roc_curve_fig_path)
 
-        # use learn_clas_fwd for the ensemble to get close confusion matrix for the actual
-        # interpretation = ClassificationInterpretation(learn_clas_fwd, preds, y, losses)
-        # conf_matrix = interpretation.confusion_matrix()
-
         interp = ClassificationInterpretation(learn, preds, y, losses)
         conf_matrix_fig = interp.plot_confusion_matrix(return_fig=True)
 

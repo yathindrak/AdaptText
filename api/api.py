@@ -19,22 +19,10 @@ app = Flask(__name__)
 metrics = PrometheusMetrics(app)
 metrics.info('app_info', 'Application info', version='1.0.3')
 
-# formatter = json_log_formatter.JSONFormatter()
-# json_handler = logging.FileHandler(filename='/var/log/adapttext.json')
-# json_handler.setFormatter(formatter)
-# logger = logging.getLogger('adapttext')
-# logger.addHandler(json_handler)
-# logger.setLevel(logging.INFO)
-
-# logging.basicConfig(filename='error.log',level=logging.DEBUG)
-
-# app.config['FLASK_APP'] = '/var/adapttext/api/api.py'
 app.config['DATADOG_ENV'] = 'development'
 app.config['SECRET_KEY'] = environ.get('SECRET_KEY')
-# app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('SQLITE_DB_URI')
 app.config['JWT_ACCESS_LIFESPAN'] = {'hours': 24}
 app.config['JWT_REFRESH_LIFESPAN'] = {'days': 30}
-# app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.getcwd(), environ.get('SQLITE_DB_NAME'))}"
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://spubxaae:mDLa_tbGGv7jQAWQy8J5UCr5kh_L84_H@rosie.db.elephantsql.com:5432/spubxaae"
 
 database.init_app(app)
@@ -50,13 +38,7 @@ app.register_blueprint(auth_controller, url_prefix='/api')
 app.register_blueprint(task_controller, url_prefix='/api')
 app.register_blueprint(prediction_controller, url_prefix='/api')
 
-# provide app's version and deploy environment/config name to set a gauge metric
-# register_metrics(app, app_version="v0.1.2", app_config="development")
-
-# Plug metrics WSGI app to your main app with dispatcher
-# dispatcher = DispatcherMiddleware(app.wsgi_app, {"/metrics": make_wsgi_app()})
 logger = Logger()
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
     logger.info('Server started...')
-    # run_simple(hostname="0.0.0.0", port=8080, application=dispatcher)

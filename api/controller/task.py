@@ -24,6 +24,11 @@ task_controller = Blueprint('task', __name__)
 @task_controller.route('/task', methods=['POST'])
 @auth_required
 def create():
+    """
+    Create a classification task
+    :return: Meta information associated with the task
+    :rtype: MetaInfo
+    """
     logger = Logger()
     logger.info('Initiating task...')
     json_obj = request.get_json()
@@ -81,6 +86,10 @@ def create():
 @task_controller.route('/task/upload', methods=['POST'])
 @auth_required
 def upload_csv():
+    """
+    Upload the CSV file
+    :return: file path and column headings
+    """
     logger = Logger()
     logger.info('Uploading csv file...')
     uploaded_file = request.files['filepond']
@@ -118,6 +127,9 @@ def update_progress(task_id, progress):
 @task_controller.route('/task/execute/<id>', methods=['POST'])
 @auth_required
 def execute(id):
+    """
+    Execute text classification training pipeline
+    """
     if not id:
         return make_response(
             jsonify({'error': 'Bad Request', 'message': 'No id provided', 'status_code': 400}), 400)
@@ -211,6 +223,11 @@ def execute(id):
 @task_controller.route('/task/<id>')
 @auth_required
 def get_by_id(id):
+    """
+    Get task by id
+    :return: task
+    :rtype: object
+    """
     get_task = Task.query.get(id)
 
     current_user = User.lookup(flask_praetorian.current_user().username)
@@ -227,6 +244,9 @@ def get_by_id(id):
 @task_controller.route('/retrain', methods=['POST'])
 @auth_required
 def retrain_base_lm():
+    """
+    Retrain Base LM in the continous learning flow
+    """
     logger = Logger()
     logger.info('Retraining the Pretrained Model')
 

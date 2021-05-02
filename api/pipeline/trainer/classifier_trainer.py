@@ -67,9 +67,11 @@ class ClassifierTrainer(Trainer):
         """
         learn = self.retrieve_classifier()
 
+        # DiffGrad Optimization
         optar = partial(DiffGrad, betas=(.91, .999), eps=1e-7)
         learn.opt_func = optar
 
+        # Load the LM encoder
         if self.__is_backward:
             learn.load_encoder(f'{self._lang}fine_tuned_enc_bwd')
         else:
@@ -89,7 +91,7 @@ class ClassifierTrainer(Trainer):
         classifier_initial_accuracy = evaluator.get_accuracy(classifier_initial).item()
 
         print('Gradual Unfreezing..')
-
+        # Gradual unfreezing
         if grad_unfreeze:
             learn.freeze_to(-2)
             learn.fit_one_cycle(8, lr,
@@ -102,7 +104,7 @@ class ClassifierTrainer(Trainer):
                                            ReduceLROnPlateauCallback(learn)])
 
         print('Completely Unfreezing..')
-
+        # Completely unfreezing
         learn.unfreeze()
 
         tuner = HyperParameterTuner(learn)
@@ -125,12 +127,11 @@ class ClassifierTrainer(Trainer):
             learn = classifier_initial
             print('The new accuracy is {0} %.'.format(classifier_initial_accuracy))
 
+        # Save checkpoints
         if self.__is_backward:
-            # learn.save(f'{self.lang}_clas_bwd')
             pkl_name = self.__classifiers_store_path[1] + self.__task_id + ".pkl"
             learn.export(pkl_name)
         else:
-            # learn.save(f'{self.lang}_clas')
             pkl_name = self.__classifiers_store_path[0] + self.__task_id + ".pkl"
             learn.export(pkl_name)
 

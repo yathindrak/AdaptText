@@ -26,6 +26,4 @@ class BaseLMDataBunchLoader(DataBunchLoader):
         # Store data
         data.save(f'{self._lang}_databunch')
         print(len(data.vocab.itos), len(data.train_ds))
-        # Load data
-        # data = load_data(self.path, f'{self.lang}_databunch', bs=self.bs)
         return data

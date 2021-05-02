@@ -14,9 +14,7 @@ class LMDataBunchLoader(DataBunchLoader):
         self.__label_col_name = label_col_name
         self.__continuous_train = continuous_train
         self.__app_root = app_root
-        # self.__bs = bs
         self.__is_backward = is_backward
-        # self.__lang = lang
 
     def load(self):
         """
@@ -32,6 +30,7 @@ class LMDataBunchLoader(DataBunchLoader):
         data = TextLMDataBunch.from_df('.', train_df=self.__df_train_set, valid_df=self.__df_val_set,
                                        text_cols=self.__text_col_name, tokenizer=tokenizer, backwards=self.__is_backward)
 
+        # Save checkpoints
         if self.__is_backward:
             data.save(f'{self._lang}_data_lm_bwd.pkl')
         else:
