@@ -25,5 +25,4 @@ class BaseLMDataBunchLoader(DataBunchLoader):
                 .databunch(bs=self._bs, num_workers=1, backwards=self._is_backward))
         # Store data
         data.save(f'{self._lang}_databunch')
-        print(len(data.vocab.itos), len(data.train_ds))
         return data

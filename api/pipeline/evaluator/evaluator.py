@@ -19,31 +19,30 @@ class Evaluator():
         :rtype: dict
         """
         logger = Logger()
-        preds, y, losses = learn.get_preds(with_loss=True)
+        ensemble_predictions, y_values, losses = learn.get_preds(with_loss=True)
 
-        acc = accuracy(preds, y)
-        logger.info('The accuracy is {0} %.'.format(acc))
+        ensemble_accuracy = accuracy(ensemble_predictions, y_values)
+        logger.info('Ensemble accuracy of AdaptText is {0} %.'.format(ensemble_accuracy))
 
-        err = error_rate(preds, y)
-        logger.info('The error rate is {0} %.'.format(err))
+        ensemble_error = error_rate(ensemble_predictions, y_values)
+        logger.info('Error rate of AdaptText is {0} %.'.format(ensemble_error))
 
-        # probs from log preds
-        probs = np.exp(preds[:, 1])
-        # Compute ROC curve
-        fpr, tpr, thresholds = roc_curve(y, probs, pos_label=1)
+        # ROC_Curve Computation
+        probabilities = np.exp(ensemble_predictions[:, 1])
+        false_positive_rate, true_positive_rate, threshold_vals = roc_curve(y_values, probabilities, pos_label=1)
 
         # Compute ROC area
-        roc_auc = auc(fpr, tpr)
-        logger.info('ROC area is {0}'.format(roc_auc))
+        roc_area = auc(false_positive_rate, true_positive_rate)
+        logger.info('ROC_Area of AdaptText is {0}'.format(roc_area))
 
         xlim = [-0.01, 1.0]
         ylim = [0.0, 1.01]
 
-        roc_curve_fig = self.draw_roc_curve(xlim, ylim, fpr, tpr, roc_auc)
+        roc_curve_fig = self.draw_roc_curve(xlim, ylim, false_positive_rate, true_positive_rate, roc_area)
         roc_curve_fig_path = 'roc_curve_' + str(uuid.uuid4()) + '.png'
         roc_curve_fig.savefig(roc_curve_fig_path)
 
-        interp = ClassificationInterpretation(learn, preds, y, losses)
+        interp = ClassificationInterpretation(learn, ensemble_predictions, y_values, losses)
         conf_matrix_fig = interp.plot_confusion_matrix(return_fig=True)
 
         conf_matrix_fig_path = 'conf_matrix_' + str(uuid.uuid4()) + '.png'
@@ -71,8 +70,8 @@ class Evaluator():
 
         logger.info('Evaluation completed')
 
-        metrics_dict = {'acc': acc.item(), 'err': err.item(), 'xlim': xlim, 'ylim': ylim, 'fpr': fpr.tolist(),
-                        'tpr': tpr.tolist(), 'roc_auc': roc_auc.item(),
+        metrics_dict = {'acc': ensemble_accuracy.item(), 'err': ensemble_error.item(), 'xlim': xlim, 'ylim': ylim, 'fpr': false_positive_rate.tolist(),
+                        'tpr': true_positive_rate.tolist(), 'roc_auc': roc_area.item(),
                         'macro_f1': macro_f1, 'macro_precision': macro_precision, 'macro_recall': macro_recall,
                         'macro_support': macro_support, 'weighted_f1': weighted_f1,
                         'weighted_precision': weighted_precision, 'weighted_recall': weighted_recall,
@@ -81,30 +80,35 @@ class Evaluator():
 
         return metrics_dict
 
-    def draw_roc_curve(self, xlim, ylim, fpr, tpr, roc_auc):
+    def draw_roc_curve(self, xlim, ylim, false_positive_rate, true_positive_rate, roc_area):
         """
         Draw ROC Curve
         :param xlim: x axis limits
         :type xlim: list
         :param ylim: y axis limits
         :type ylim: list
-        :param fpr: false positive rate
-        :type fpr: float
-        :param tpr: true positive rate
-        :type tpr: float
-        :param roc_auc: Area under the curve
-        :type roc_auc: float
+        :param false_positive_rate: false positive rate
+        :type false_positive_rate: float
+        :param true_positive_rate: true positive rate
+        :type true_positive_rate: float
+        :param roc_area: Area_Under_the_Curve
+        :type roc_area: float
         :return: figure
         :rtype: object
         """
         fig = plt.figure()
-        plt.plot(fpr, tpr, color='darkorange', label='Ensemble Classifier : ROC curve (area = %0.2f)' % roc_auc)
+
+        # Add Graph Details
+        plt.plot(false_positive_rate, true_positive_rate, color='darkorange', label='Ensemble Classifier : ROC curve (area = %0.2f)' % roc_area)
         plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
         plt.xlim(xlim)
         plt.ylim(ylim)
+        # Add X and Y axes
         plt.xlabel('False Positive(FP) Rate')
         plt.ylabel('True Positive(TP) Rate')
-        plt.title('Receiver operating characteristic')
+        # Add Graph title
+        plt.title('Receiver Operating Characteristic')
+        # Add Graph legend
         plt.legend(loc="lower right")
 
         return fig
@@ -118,9 +122,9 @@ class Evaluator():
         :rtype: float
         """
         logger = Logger()
-        preds, y, losses = learn.get_preds(with_loss=True)
+        model_predictions, y_vals, losses = learn.get_preds(with_loss=True)
 
-        acc = accuracy(preds, y)
-        logger.info('The accuracy is {0} %.'.format(acc))
+        model_accuracy = accuracy(model_predictions, y_vals)
+        logger.info('Accuracy of AdaptText is {0} %.'.format(model_accuracy))
 
-        return acc
+        return model_accuracy

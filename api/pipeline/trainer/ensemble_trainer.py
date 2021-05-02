@@ -22,40 +22,46 @@ class EnsembleTrainer(Trainer):
         :rtype: object
         """
         metrics = [error_rate, accuracy]
-        pred_tensors_fwd, pred_tensors_target_fwd = self.__learn_clas_fwd.get_preds(DatasetType.Valid, ordered=True)
-        pred_tensors_bwd, pred_tensors_target_bwd = self.__learn_clas_bwd.get_preds(DatasetType.Valid, ordered=True)
+        prediction_tensors_fwd, prediction_tensors_target_fwd = self.__learn_clas_fwd.get_preds(DatasetType.Valid, ordered=True)
+        prediction_tensors_bwd, prediction_tensors_target_bwd = self.__learn_clas_bwd.get_preds(DatasetType.Valid, ordered=True)
 
-        fwd_df = pd.DataFrame(pred_tensors_fwd.numpy())
+        fwd_df = pd.DataFrame(prediction_tensors_fwd.numpy())
         for idx in range(len(self.__classes)):
             fwd_df.rename(columns={idx: self.__classes[idx]}, inplace=True)
 
-        bwd_df = pd.DataFrame(pred_tensors_bwd.numpy())
+        bwd_df = pd.DataFrame(prediction_tensors_bwd.numpy())
         for idx in range(len(self.__classes)):
             bwd_df.rename(columns={idx: self.__classes[idx]}, inplace=True)
 
         preds_fwd = fwd_df.add_prefix('fwd_')
         preds_textm_bwd = bwd_df.add_prefix('bwd_')
-        preds_target_fwd = pd.DataFrame(pred_tensors_target_fwd.numpy())
+        preds_actual_target_fwd = pd.DataFrame(prediction_tensors_target_fwd.numpy())
 
-        ensemble_df = (preds_fwd
+        ensemble_dataframe = (preds_fwd
                        .join(preds_textm_bwd)
-                       .join(preds_target_fwd).rename(columns={0: "target"})
+                       .join(preds_actual_target_fwd).rename(columns={0: "target"})
                        )
 
-        ensemble_df["target"].replace(list(range(0, len(self.__classes))), self.__classes, inplace=True)
+        ensemble_dataframe["target"].replace(list(range(0, len(self.__classes))), self.__classes, inplace=True)
 
-        column_names = ensemble_df.columns.values.tolist()
+        column_names = ensemble_dataframe.columns.values.tolist()
         column_names.pop()
 
-        tabular_processes = [FillMissing, Categorify, Normalize]
+        tabular_processes = [Categorify, Normalize, FillMissing]
 
-        data_ensemble = (TabularList
-                         .from_df(ensemble_df, cat_names=[], cont_names=column_names, procs=tabular_processes)
-                         .split_by_rand_pct(valid_pct=0.1, seed=42)
+        embedding_layer_dropout_prob = 0.04
+        layer_set = [1000, 500]
+        dropout_probs = [0.001, 0.01]
+
+        valid_percentage = 0.1
+
+        ensemble_databunch = (TabularList
+                         .from_df(ensemble_dataframe, cat_names=[], cont_names=column_names, procs=tabular_processes)
+                         .split_by_rand_pct(valid_pct=valid_percentage, seed=42)
                          .label_from_df(cols="target")
                          .databunch())
 
-        learn = tabular_learner(data_ensemble, layers=[1000, 500], ps=[0.001, 0.01], metrics=metrics, emb_drop=0.04)
+        learn = tabular_learner(ensemble_databunch, layers=layer_set, ps=dropout_probs, metrics=metrics, emb_drop=embedding_layer_dropout_prob)
 
         return learn
 

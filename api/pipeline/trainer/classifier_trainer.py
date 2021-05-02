@@ -76,12 +76,14 @@ class ClassifierTrainer(Trainer):
             learn.load_encoder(f'{self._lang}fine_tuned_enc_bwd')
         else:
             learn.load_encoder(f'{self._lang}fine_tuned_enc')
+        # Freeze the model
         learn.freeze()
 
-        # Find LR
+        # Obtain optimal LR
         tuner = HyperParameterTuner(learn)
         lr = tuner.find_optimized_lr()
 
+        # Train classifier for 12 iterations
         learn.fit_one_cycle(12, lr, callbacks=[SaveModelCallback(learn), ReduceLROnPlateauCallback(learn)])
 
         # store model temporarily
@@ -93,12 +95,16 @@ class ClassifierTrainer(Trainer):
         print('Gradual Unfreezing..')
         # Gradual unfreezing
         if grad_unfreeze:
+            # Freeze two layer groups
             learn.freeze_to(-2)
+            # Train classifier for eight iterations
             learn.fit_one_cycle(8, lr,
                                 callbacks=[SaveModelCallback(learn),
                                            ReduceLROnPlateauCallback(learn)])
 
+            # Freeze three layer groups
             learn.freeze_to(-3)
+            # Train classifier for six iterations
             learn.fit_one_cycle(6, lr,
                                 callbacks=[SaveModelCallback(learn),
                                            ReduceLROnPlateauCallback(learn)])
@@ -107,6 +113,7 @@ class ClassifierTrainer(Trainer):
         # Completely unfreezing
         learn.unfreeze()
 
+        # Obtain optimal LR
         tuner = HyperParameterTuner(learn)
         lr_unfrozed = tuner.find_optimized_lr()
 
