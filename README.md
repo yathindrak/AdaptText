@@ -1,10 +1,19 @@
-# Getting Started with Create React App
+# Getting Started with AdaptText Developer Framework UI Based Solution
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Make text classification available for everyone !!!
+## Setup
 
-## Available Scripts
+In the project directory, first clone the library
 
-In the project directory, you can run:
+`git clone https://gitlab.com/yathindrakodithuwakku/AdaptText.git`
+
+Then run the create-db.sh shell script to setup the posgresql db schema.
+
+`cd AdaptText && bash create-db.sh`
+
+Finally run the setup.sh shell script to make everything ready for you.
+
+`cd AdaptText && bash setup.sh`
 
 ### `yarn start`
 
