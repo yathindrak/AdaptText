@@ -1,6 +1,9 @@
 # Getting Started with AdaptText Developer Framework UI Based Solution
 
 Make text classification available for everyone !!!
+
+If the requirement is a library based solution [AdaptText library](https://github.com/yathindrakodithuwakku/AdaptTextLib).
+
 ## Setup
 
 In the project directory, first clone the library
