@@ -2,7 +2,7 @@
 
 Make text classification available for everyone !!!
 
-If the requirement is a library based solution [AdaptText library](https://github.com/yathindrakodithuwakku/AdaptTextLib).
+If the requirement is a library based solution, please refer [AdaptText library](https://github.com/yathindrakodithuwakku/AdaptTextLib).
 
 ## Setup
 
