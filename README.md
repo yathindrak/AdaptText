@@ -1,3 +1,5 @@
+![AdapText](https://user-images.githubusercontent.com/32919513/161374397-9af13bbb-4084-46a3-93dd-c1282ce83f24.png)
+
 # Getting Started with AdaptText Developer Framework UI Based Solution
 
 Make text classification available for everyone !!!
